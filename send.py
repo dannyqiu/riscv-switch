@@ -48,7 +48,7 @@ class Instruction(Packet):
 
 bind_layers(UDP, ProtoWrapper, dport=PROTOCOL_PORT)
 bind_layers(ProtoWrapper, Instruction, type=PROTO_PROGRAM)
-bind_layers(Instruction, Instruction, )
+bind_layers(Instruction, Instruction, bos=0)
 
 
 def AddI(dst=0, src=0, imm=0, **kwargs):
