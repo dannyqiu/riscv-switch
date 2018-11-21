@@ -1,3 +1,5 @@
+#include "assembly.p4"
+
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -54,5 +56,8 @@ struct headers {
     ipv4_t       ipv4;
     tcp_t        tcp;
     udp_t        udp;
-}
 
+    program_metadata_t            program_metadata;
+    register_t[NUM_REGISTERS]   registers;
+    insn_t[MAX_INSNS]           insns;
+}
