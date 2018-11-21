@@ -1,0 +1,45 @@
+logs/
+pcaps/
+
+# Compiled Files #
+a.out
+bin/
+build/
+obj/
+*.class
+*.pyc
+*.a
+*.o
+*.sx
+
+# Text Backup Files #
+*.sw[a-z]
+*~
+\#*\#
+.\#*
+
+# OS X Files #
+.DS_Store
+._*
+.Spotlight*
+.Trashes
+
+# Windows Files #
+Thumbs.db
+ehthumbs.db
+
+# Package Files #
+*.war
+*.ear
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# VSCode Files
+.vscode
+.classpath
+.project
