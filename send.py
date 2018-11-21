@@ -46,8 +46,31 @@ class Instruction(Packet):
     ]
 
 
+class Registers(Packet):
+    name = 'Registers'
+    fields_desc = [
+        IntField('r0', 0),
+        IntField('r1', 0),
+        IntField('r2', 0),
+        IntField('r3', 0),
+        IntField('r4', 0),
+        IntField('r5', 0),
+        IntField('r6', 0),
+        IntField('r7', 0),
+        IntField('r8', 0),
+        IntField('r9', 0),
+        IntField('r10', 0),
+        IntField('r11', 0),
+        IntField('r12', 0),
+        IntField('r13', 0),
+        IntField('r14', 0),
+        IntField('r15', 0),
+    ]
+
+
 bind_layers(UDP, ProtoWrapper, dport=PROTOCOL_PORT)
-bind_layers(ProtoWrapper, Instruction, type=PROTO_PROGRAM)
+bind_layers(ProtoWrapper, Registers, type=PROTO_PROGRAM)
+bind_layers(Registers, Instruction)
 bind_layers(Instruction, Instruction, bos=0)
 
 
@@ -185,6 +208,7 @@ def Bltz(src=0, imm=0, **kwargs):
 
 def make_program(pkt, insns: [Instruction]):
     pkt /= ProtoWrapper(type=PROTO_PROGRAM, src=IP().src, max_steps=0xFFFF)
+    pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
     for idx, insn in enumerate(insns):
         if idx == len(insns) - 1:
