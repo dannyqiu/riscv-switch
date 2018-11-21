@@ -159,6 +159,28 @@ def Lw(dst=0, src=0, target=0, **kwargs):
     return Instruction(opcode=0b1011000, dst=dst, src=src, target=target, **kwargs)
 
 
+def Beq(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100000, dst=dst, src=src, imm=(0x0FFF & imm), **kwargs)
+
+
+def Bne(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100001, dst=dst, src=src, imm=(0x0FFF & imm), **kwargs)
+
+
+def Bgez(src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100010, src=src, imm=(0x0FFF & imm), **kwargs)
+
+
+def Blez(src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100011, src=src, imm=(0x0FFF & imm), **kwargs)
+
+
+def Bgtz(src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100100, src=src, imm=(0x0FFF & imm), **kwargs)
+
+
+def Bltz(src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0100101, src=src, imm=(0x0FFF & imm), **kwargs)
 
 
 def make_program(pkt, insns: [Instruction]):
