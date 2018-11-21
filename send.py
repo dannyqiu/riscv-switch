@@ -83,6 +83,84 @@ def Div(dst=0, src=0, target=0, **kwargs):
     return Instruction(opcode=0b1000011, dst=dst, src=src, target=target, **kwargs)
 
 
+def SllI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0000100, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+
+
+def Sll(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1000100, dst=dst, src=src, target=target, **kwargs)
+
+
+def SrlI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0000110, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+
+
+def Srl(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1000110, dst=dst, src=src, target=target, **kwargs)
+
+
+def SraI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0000111, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+
+
+def Sra(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1000111, dst=dst, src=src, target=target, **kwargs)
+
+
+def AndI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0001000, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+
+
+def And(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001000, dst=dst, src=src, target=target, **kwargs)
+
+
+def OrI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0001001, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+
+
+def Or(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001001, dst=dst, src=src, target=target, **kwargs)
+
+
+def XorI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0001010, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+
+
+def Xor(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001010, dst=dst, src=src, target=target, **kwargs)
+
+
+def MovI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0001100, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+
+
+def Mov(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001100, dst=dst, src=src, target=target, **kwargs)
+
+
+def Movz(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001101, dst=dst, src=src, target=target, **kwargs)
+
+
+def Movn(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1001110, dst=dst, src=src, target=target, **kwargs)
+
+
+def SwI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(opcode=0b0010000, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+
+
+def Sw(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1010000, dst=dst, src=src, target=target, **kwargs)
+
+
+def Lw(dst=0, src=0, target=0, **kwargs):
+    return Instruction(opcode=0b1011000, dst=dst, src=src, target=target, **kwargs)
+
+
+
+
 def make_program(pkt, insns: [Instruction]):
     pkt /= ProtoWrapper(type=PROTO_PROGRAM, src=IP().src, max_steps=0xFFFF)
     assert len(insns) < MAX_PROGRAM_LENGTH
