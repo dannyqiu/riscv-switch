@@ -122,7 +122,7 @@ def Div(dst=0, src=0, target=0, **kwargs):
 
 
 def SllI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b000100, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000100, dst=dst, src=src, target=imm, **kwargs)
 
 
 def Sll(dst=0, src=0, target=0, **kwargs):
@@ -130,7 +130,7 @@ def Sll(dst=0, src=0, target=0, **kwargs):
 
 
 def SrlI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b000110, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000110, dst=dst, src=src, target=imm, **kwargs)
 
 
 def Srl(dst=0, src=0, target=0, **kwargs):
@@ -138,7 +138,7 @@ def Srl(dst=0, src=0, target=0, **kwargs):
 
 
 def SraI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b000111, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000111, dst=dst, src=src, target=imm, **kwargs)
 
 
 def Sra(dst=0, src=0, target=0, **kwargs):
