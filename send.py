@@ -11,7 +11,7 @@ import readline
 
 PROTO_PROGRAM = 0x00
 PROTOCOL_PORT = 4321
-MAX_PROGRAM_LENGTH = 350
+MAX_PROGRAM_LENGTH = 300
 
 
 def get_if():
@@ -37,12 +37,11 @@ class ProtoWrapper(Packet):
 class Instruction(Packet):
     name = 'Instruction'
     fields_desc = [
-        BitField('bos', 0, 1),
-        BitField('opcode', 0, 7),
-        BitField('dst', 0, 4),
-        BitField('src', 0, 4),
-        BitField('target', 0, 4),
-        BitField('imm', 0, 12),
+        BitField('opcode', 0, 6),
+        BitField('dst', 0, 5),
+        BitField('src', 0, 5),
+        BitField('target', 0, 5),
+        BitField('imm', 0, 11),
     ]
 
 
@@ -65,157 +64,174 @@ class Registers(Packet):
         IntField('r13', 0),
         IntField('r14', 0),
         IntField('r15', 0),
+        IntField('r16', 0),
+        IntField('r17', 0),
+        IntField('r18', 0),
+        IntField('r19', 0),
+        IntField('r20', 0),
+        IntField('r21', 0),
+        IntField('r22', 0),
+        IntField('r23', 0),
+        IntField('r24', 0),
+        IntField('r25', 0),
+        IntField('r26', 0),
+        IntField('r27', 0),
+        IntField('r28', 0),
+        IntField('r29', 0),
+        IntField('r30', 0),
+        IntField('r31', 0),
     ]
 
 
 bind_layers(UDP, ProtoWrapper, dport=PROTOCOL_PORT)
 bind_layers(ProtoWrapper, Registers, type=PROTO_PROGRAM)
 bind_layers(Registers, Instruction)
-bind_layers(Instruction, Instruction, bos=0)
+bind_layers(Instruction, Instruction)
 
 
 def AddI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000000, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b000000, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Add(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000000, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100000, dst=dst, src=src, target=target, **kwargs)
 
 
 def SubI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000001, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b000001, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Sub(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000001, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100001, dst=dst, src=src, target=target, **kwargs)
 
 
 def MulI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000010, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b000010, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Mul(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000010, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100010, dst=dst, src=src, target=target, **kwargs)
 
 
 def DivI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000011, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b000011, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Div(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000011, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100011, dst=dst, src=src, target=target, **kwargs)
 
 
 def SllI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000100, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000100, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
 
 
 def Sll(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000100, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100100, dst=dst, src=src, target=target, **kwargs)
 
 
 def SrlI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000110, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000110, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
 
 
 def Srl(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000110, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100110, dst=dst, src=src, target=target, **kwargs)
 
 
 def SraI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0000111, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
+    return Instruction(opcode=0b000111, dst=dst, src=src, imm=(0b11111 & imm), **kwargs)
 
 
 def Sra(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1000111, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b100111, dst=dst, src=src, target=target, **kwargs)
 
 
 def AndI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0001000, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b001000, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def And(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001000, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101000, dst=dst, src=src, target=target, **kwargs)
 
 
 def OrI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0001001, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b001001, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Or(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001001, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101001, dst=dst, src=src, target=target, **kwargs)
 
 
 def XorI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0001010, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b001010, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Xor(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001010, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101010, dst=dst, src=src, target=target, **kwargs)
 
 
 def MovI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0001100, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b001100, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Mov(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001100, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101100, dst=dst, src=src, target=target, **kwargs)
 
 
 def Movz(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001101, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101101, dst=dst, src=src, target=target, **kwargs)
 
 
 def Movn(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1001110, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b101110, dst=dst, src=src, target=target, **kwargs)
 
 
 def SwI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0010000, dst=dst, src=src, target=(imm >> 12), imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b010000, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
 def Sw(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1010000, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b110000, dst=dst, src=src, target=target, **kwargs)
 
 
 def Lw(dst=0, src=0, target=0, **kwargs):
-    return Instruction(opcode=0b1011000, dst=dst, src=src, target=target, **kwargs)
+    return Instruction(opcode=0b110001, dst=dst, src=src, target=target, **kwargs)
 
 
 def Beq(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100000, dst=dst, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011000, dst=dst, src=src, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Bne(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100001, dst=dst, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011001, dst=dst, src=src, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Bgez(src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100010, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011010, src=src, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Blez(src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100011, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011011, src=src, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Bgtz(src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100100, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011100, src=src, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Bltz(src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b0100101, src=src, imm=(0x0FFF & imm), **kwargs)
+    return Instruction(opcode=0b011101, src=src, imm=(0b11111111111 & imm), **kwargs)
+
+
+def EndOfProgram(src=0, imm=0, **kwargs):
+    return Instruction(opcode=-1, dst=-1, src=-1, target=-1, imm=-1, **kwargs)
 
 
 def make_program(pkt, insns: [Instruction]):
     pkt /= ProtoWrapper(type=PROTO_PROGRAM, src=IP().src, max_steps=0xFFFF)
     pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
-    for idx, insn in enumerate(insns):
-        if idx == len(insns) - 1:
-            insn.bos = 1
-        else:
-            insn.bos = 0
+    for insn in insns:
         pkt /= insn
+    pkt /= EndOfProgram()
     return pkt
 
 
