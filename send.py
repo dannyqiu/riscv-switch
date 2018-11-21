@@ -79,7 +79,7 @@ class Registers(Packet):
         IntField('r28', 0),
         IntField('r29', 0),
         IntField('r30', 0),
-        IntField('r31', 0),
+        IntField('pc', 0),
     ]
 
 
@@ -197,12 +197,12 @@ def Lw(dst=0, src=0, target=0, **kwargs):
     return Instruction(opcode=0b110001, dst=dst, src=src, target=target, **kwargs)
 
 
-def Beq(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b011000, dst=dst, src=src, imm=(0b11111111111 & imm), **kwargs)
+def Beq(src=0, target=0, imm=0, **kwargs):
+    return Instruction(opcode=0b011000, src=src, target=target, imm=(0b11111111111 & imm), **kwargs)
 
 
-def Bne(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(opcode=0b011001, dst=dst, src=src, imm=(0b11111111111 & imm), **kwargs)
+def Bne(src=0, target=0, imm=0, **kwargs):
+    return Instruction(opcode=0b011001, src=src, target=target, imm=(0b11111111111 & imm), **kwargs)
 
 
 def Bgez(src=0, imm=0, **kwargs):
