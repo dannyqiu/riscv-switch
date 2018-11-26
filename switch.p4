@@ -247,7 +247,8 @@ control MyIngress(inout headers hdr,
     }
 
     action set_register(in bit<5> r, in bit<32> value) {
-        SET_REG_PRIMARY(r, 0, value)
+        // Zero-register must always contain zero
+        SET_REG_PRIMARY(r, 0, 0)
         SET_REG_OTHERWISE(r, 1, value)
         SET_REG_OTHERWISE(r, 2, value)
         SET_REG_OTHERWISE(r, 3, value)
