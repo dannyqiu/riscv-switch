@@ -27,10 +27,8 @@ class ProtoWrapper(Packet):
     name = 'ProtoWrapper'
     fields_desc = [
         IPField('src', '127.0.0.1'),
-        BitField('mem_namespace', 0, 32),
-        BitField('type', PROTO_PROGRAM, 8),
-        BitField('steps', 0, 12),
-        BitField('max_steps', 0, 12),
+        BitField('pc', 0, 32),
+        BitField('steps', 0, 32),
     ]
 
 

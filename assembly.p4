@@ -12,8 +12,9 @@ header register_t {
 }
 
 header program_metadata_t {
-    bit<16>   src;
+    bit<32>   src;
     bit<32>   pc;
+    bit<32>   steps;
 }
 
 /*******************************************************************************
