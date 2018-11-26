@@ -49,6 +49,7 @@ header udp_t {
 }
 
 struct metadata {
+    insn_unknown_t   current_insn;
 }
 
 struct headers {
@@ -57,7 +58,7 @@ struct headers {
     tcp_t        tcp;
     udp_t        udp;
 
-    program_metadata_t            program_metadata;
+    program_metadata_t          program_metadata;
     register_t[NUM_REGISTERS]   registers;
-    insn_t[MAX_INSNS]           insns;
+    insn_unknown_t[MAX_INSNS]   insns;
 }

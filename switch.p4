@@ -7,10 +7,61 @@
 *********************** P A R S E R  ***********************************
 *************************************************************************/
 
+parser ProgramParser(packet_in packet,
+                     out headers hdr,
+                     inout metadata meta) {
+
+    bit<32> registers_to_parse;
+    bit<32> insns_to_current;
+
+    state start {
+        packet.extract(hdr.program_metadata);
+        registers_to_parse = NUM_REGISTERS;
+        insns_to_current = hdr.program_metadata.pc;
+        transition parse_registers;
+    }
+
+    state parse_registers {
+        registers_to_parse = registers_to_parse - 1;
+        packet.extract(hdr.registers.next);
+        transition select(registers_to_parse) {
+            0: parse_insns;
+            default: parse_registers;
+        }
+    }
+
+    state parse_insns {
+        transition select(packet.lookahead<bit<32>>()) {
+            32w0: accept;
+            default: parse_insn;
+        }
+    }
+
+    state parse_insn {
+        packet.extract(hdr.insns.next);
+        insns_to_current = insns_to_current - 1;
+        transition select(insns_to_current) {
+            0xffffffff: set_current_insn;
+            default: parse_insns;
+        }
+    }
+
+    // save current PC instruction during parsing, since we cannot access arrays
+    // with non-constant values in the other stages
+    state set_current_insn {
+        meta.current_insn = hdr.insns.last;
+        meta.current_insn.setValid();
+        transition parse_insns;
+    }
+
+}
+
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
+
+    ProgramParser() program_parser;
 
     state start {
         transition parse_ethernet;
@@ -45,11 +96,8 @@ parser MyParser(packet_in packet,
     }
 
     state parse_program {
-        packet.extract(hdr.insns.next);
-        transition select(hdr.insns.last.bos) {
-            0: parse_program;
-            default: accept;
-        }
+        program_parser.apply(packet, hdr, meta);
+        transition accept;
     }
 
 }
@@ -95,10 +143,46 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
+    action handle_rtype() {
+
+    }
+
+    action handle_itype() {
+
+    }
+
+    action handle_stype() {
+
+    }
+
+    action handle_utype() {
+
+    }
+
+    table insn_opcode_exact {
+        key = {
+            meta.current_insn.opcode: exact;
+        }
+        actions = {
+            handle_rtype;
+            handle_itype;
+            handle_stype;
+            handle_utype;
+            NoAction();
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
     apply {
-        drop();
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
+        }
+        else if (meta.current_insn.isValid()) {
+            insn_opcode_exact.apply();
+        }
+        else {
+            drop();
         }
     }
 }

@@ -1,7 +1,7 @@
 const bit<8>  PROTO_PROGRAM = 0x0;
 
 const bit<32> NUM_REGISTERS = 32;
-const bit<32> MAX_INSNS = 350;
+const bit<32> MAX_INSNS = 300;
 
 /*******************************************************************************
 *********************** M E T A D A T A ****************************************
@@ -29,11 +29,53 @@ const bit<8> MULI = 0b10000010;
 const bit<8> DIV  = 0b00000011;
 const bit<8> DIVI = 0b10000011;
 
-header insn_t {
-    bit<1>   bos;
-    bit<8>   opcode;
-    bit<5>   dst;
-    bit<5>   src;
-    bit<5>   target;
-    bit<11>  imm;
+header insn_unknown_t {
+    bit<7>  funct7;
+    bit<5>  part1;
+    bit<5>  part2;
+    bit<3>  funct3;
+    bit<5>  part3;
+    bit<7>  opcode;
+}
+
+header insn_rtype_t {
+    bit<7>  funct7;
+    bit<5>  rs2;
+    bit<5>  rs1;
+    bit<3>  funct3;
+    bit<5>  rd;
+    bit<7>  opcode;
+}
+
+header insn_itype_t {
+    bit<12> imm;
+    bit<5>  rs1;
+    bit<3>  funct3;
+    bit<5>  rd;
+    bit<7>  opcode;
+}
+
+header insn_stype_t {
+    bit<7>  imm_upper;
+    bit<5>  rs2;
+    bit<5>  rs1;
+    bit<3>  funct3;
+    bit<5>  imm_lower;
+    bit<7>  opcode;
+}
+
+header insn_utype_t {
+    bit<20> imm;
+    bit<5>  rd;
+    bit<7>  opcode;
+}
+
+// header_union is not fully supported in P4lang
+// Specifically, we cannot create a header_union stack in a struct
+header_union insn_t {
+    insn_rtype_t   rtype;
+    insn_itype_t   itype;
+    insn_stype_t   stype;
+    insn_utype_t   utype;
+    insn_unknown_t unknown;
 }
