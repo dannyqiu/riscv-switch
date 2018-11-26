@@ -3,6 +3,11 @@
 #include <v1model.p4>
 #include "headers.p4"
 
+#define GET_REG_PRIMARY(r, n, v) if (r == n) { v = hdr.registers[n].value; }
+#define GET_REG_OTHERWISE(r, n, v) else if (r == n) { v = hdr.registers[n].value; }
+#define SET_REG_PRIMARY(r, n, v) if (r == n) { hdr.registers[n].value = v; }
+#define SET_REG_OTHERWISE(r, n, v) else if (r == n) { hdr.registers[n].value = v; }
+
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
@@ -206,204 +211,74 @@ control MyIngress(inout headers hdr,
     }
 
     action get_register(in bit<5> r, out bit<32> value) {
-        if (r == 0) {
-            value = hdr.registers[0].value;
-        }
-        else if (r == 1) {
-            value = hdr.registers[1].value;
-        }
-        else if (r == 2) {
-            value = hdr.registers[2].value;
-        }
-        else if (r == 3) {
-            value = hdr.registers[3].value;
-        }
-        else if (r == 4) {
-            value = hdr.registers[4].value;
-        }
-        else if (r == 5) {
-            value = hdr.registers[5].value;
-        }
-        else if (r == 6) {
-            value = hdr.registers[6].value;
-        }
-        else if (r == 7) {
-            value = hdr.registers[7].value;
-        }
-        else if (r == 8) {
-            value = hdr.registers[8].value;
-        }
-        else if (r == 9) {
-            value = hdr.registers[9].value;
-        }
-        else if (r == 10) {
-            value = hdr.registers[10].value;
-        }
-        else if (r == 11) {
-            value = hdr.registers[11].value;
-        }
-        else if (r == 12) {
-            value = hdr.registers[12].value;
-        }
-        else if (r == 13) {
-            value = hdr.registers[13].value;
-        }
-        else if (r == 14) {
-            value = hdr.registers[14].value;
-        }
-        else if (r == 15) {
-            value = hdr.registers[15].value;
-        }
-        else if (r == 16) {
-            value = hdr.registers[16].value;
-        }
-        else if (r == 17) {
-            value = hdr.registers[17].value;
-        }
-        else if (r == 18) {
-            value = hdr.registers[18].value;
-        }
-        else if (r == 19) {
-            value = hdr.registers[19].value;
-        }
-        else if (r == 20) {
-            value = hdr.registers[20].value;
-        }
-        else if (r == 21) {
-            value = hdr.registers[21].value;
-        }
-        else if (r == 22) {
-            value = hdr.registers[22].value;
-        }
-        else if (r == 23) {
-            value = hdr.registers[23].value;
-        }
-        else if (r == 24) {
-            value = hdr.registers[24].value;
-        }
-        else if (r == 25) {
-            value = hdr.registers[25].value;
-        }
-        else if (r == 26) {
-            value = hdr.registers[26].value;
-        }
-        else if (r == 27) {
-            value = hdr.registers[27].value;
-        }
-        else if (r == 28) {
-            value = hdr.registers[28].value;
-        }
-        else if (r == 29) {
-            value = hdr.registers[29].value;
-        }
-        else if (r == 30) {
-            value = hdr.registers[30].value;
-        }
-        else if (r == 31) {
-            value = hdr.registers[31].value;
-        }
-        else {
-            value = 0;
-        }
+        value = 0;
+        GET_REG_PRIMARY(r, 0, value)
+        GET_REG_OTHERWISE(r, 1, value)
+        GET_REG_OTHERWISE(r, 2, value)
+        GET_REG_OTHERWISE(r, 3, value)
+        GET_REG_OTHERWISE(r, 4, value)
+        GET_REG_OTHERWISE(r, 5, value)
+        GET_REG_OTHERWISE(r, 6, value)
+        GET_REG_OTHERWISE(r, 7, value)
+        GET_REG_OTHERWISE(r, 8, value)
+        GET_REG_OTHERWISE(r, 9, value)
+        GET_REG_OTHERWISE(r, 10, value)
+        GET_REG_OTHERWISE(r, 11, value)
+        GET_REG_OTHERWISE(r, 12, value)
+        GET_REG_OTHERWISE(r, 13, value)
+        GET_REG_OTHERWISE(r, 14, value)
+        GET_REG_OTHERWISE(r, 15, value)
+        GET_REG_OTHERWISE(r, 16, value)
+        GET_REG_OTHERWISE(r, 17, value)
+        GET_REG_OTHERWISE(r, 18, value)
+        GET_REG_OTHERWISE(r, 19, value)
+        GET_REG_OTHERWISE(r, 20, value)
+        GET_REG_OTHERWISE(r, 21, value)
+        GET_REG_OTHERWISE(r, 22, value)
+        GET_REG_OTHERWISE(r, 23, value)
+        GET_REG_OTHERWISE(r, 24, value)
+        GET_REG_OTHERWISE(r, 25, value)
+        GET_REG_OTHERWISE(r, 26, value)
+        GET_REG_OTHERWISE(r, 27, value)
+        GET_REG_OTHERWISE(r, 28, value)
+        GET_REG_OTHERWISE(r, 29, value)
+        GET_REG_OTHERWISE(r, 30, value)
+        GET_REG_OTHERWISE(r, 31, value)
     }
 
     action set_register(in bit<5> r, in bit<32> value) {
-        if (r == 0) {
-            hdr.registers[0].value = value;
-        }
-        else if (r == 1) {
-            hdr.registers[1].value = value;
-        }
-        else if (r == 2) {
-            hdr.registers[2].value = value;
-        }
-        else if (r == 3) {
-            hdr.registers[3].value = value;
-        }
-        else if (r == 4) {
-            hdr.registers[4].value = value;
-        }
-        else if (r == 5) {
-            hdr.registers[5].value = value;
-        }
-        else if (r == 6) {
-            hdr.registers[6].value = value;
-        }
-        else if (r == 7) {
-            hdr.registers[7].value = value;
-        }
-        else if (r == 8) {
-            hdr.registers[8].value = value;
-        }
-        else if (r == 9) {
-            hdr.registers[9].value = value;
-        }
-        else if (r == 10) {
-            hdr.registers[10].value = value;
-        }
-        else if (r == 11) {
-            hdr.registers[11].value = value;
-        }
-        else if (r == 12) {
-            hdr.registers[12].value = value;
-        }
-        else if (r == 13) {
-            hdr.registers[13].value = value;
-        }
-        else if (r == 14) {
-            hdr.registers[14].value = value;
-        }
-        else if (r == 15) {
-            hdr.registers[15].value = value;
-        }
-        else if (r == 16) {
-            hdr.registers[16].value = value;
-        }
-        else if (r == 17) {
-            hdr.registers[17].value = value;
-        }
-        else if (r == 18) {
-            hdr.registers[18].value = value;
-        }
-        else if (r == 19) {
-            hdr.registers[19].value = value;
-        }
-        else if (r == 20) {
-            hdr.registers[20].value = value;
-        }
-        else if (r == 21) {
-            hdr.registers[21].value = value;
-        }
-        else if (r == 22) {
-            hdr.registers[22].value = value;
-        }
-        else if (r == 23) {
-            hdr.registers[23].value = value;
-        }
-        else if (r == 24) {
-            hdr.registers[24].value = value;
-        }
-        else if (r == 25) {
-            hdr.registers[25].value = value;
-        }
-        else if (r == 26) {
-            hdr.registers[26].value = value;
-        }
-        else if (r == 27) {
-            hdr.registers[27].value = value;
-        }
-        else if (r == 28) {
-            hdr.registers[28].value = value;
-        }
-        else if (r == 29) {
-            hdr.registers[29].value = value;
-        }
-        else if (r == 30) {
-            hdr.registers[30].value = value;
-        }
-        else if (r == 31) {
-            hdr.registers[31].value = value;
-        }
+        SET_REG_PRIMARY(r, 0, value)
+        SET_REG_OTHERWISE(r, 1, value)
+        SET_REG_OTHERWISE(r, 2, value)
+        SET_REG_OTHERWISE(r, 3, value)
+        SET_REG_OTHERWISE(r, 4, value)
+        SET_REG_OTHERWISE(r, 5, value)
+        SET_REG_OTHERWISE(r, 6, value)
+        SET_REG_OTHERWISE(r, 7, value)
+        SET_REG_OTHERWISE(r, 8, value)
+        SET_REG_OTHERWISE(r, 9, value)
+        SET_REG_OTHERWISE(r, 10, value)
+        SET_REG_OTHERWISE(r, 11, value)
+        SET_REG_OTHERWISE(r, 12, value)
+        SET_REG_OTHERWISE(r, 13, value)
+        SET_REG_OTHERWISE(r, 14, value)
+        SET_REG_OTHERWISE(r, 15, value)
+        SET_REG_OTHERWISE(r, 16, value)
+        SET_REG_OTHERWISE(r, 17, value)
+        SET_REG_OTHERWISE(r, 18, value)
+        SET_REG_OTHERWISE(r, 19, value)
+        SET_REG_OTHERWISE(r, 20, value)
+        SET_REG_OTHERWISE(r, 21, value)
+        SET_REG_OTHERWISE(r, 22, value)
+        SET_REG_OTHERWISE(r, 23, value)
+        SET_REG_OTHERWISE(r, 24, value)
+        SET_REG_OTHERWISE(r, 25, value)
+        SET_REG_OTHERWISE(r, 26, value)
+        SET_REG_OTHERWISE(r, 27, value)
+        SET_REG_OTHERWISE(r, 28, value)
+        SET_REG_OTHERWISE(r, 29, value)
+        SET_REG_OTHERWISE(r, 30, value)
+        SET_REG_OTHERWISE(r, 31, value)
     }
 
     action insn_add() {
