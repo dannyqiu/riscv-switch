@@ -32,7 +32,7 @@ parser ProgramParser(packet_in packet,
 
     state parse_insns {
         transition select(packet.lookahead<bit<32>>()) {
-            32w0: accept;
+            0xffffffff: parse_end_program;
             default: check_current_insn;
         }
     }
@@ -61,6 +61,11 @@ parser ProgramParser(packet_in packet,
         meta.current_insn.opcode = packet.lookahead<bit<32>>()[6:0];
         meta.current_insn.setValid();
         transition parse_insn;
+    }
+
+    state parse_end_program {
+        packet.extract(hdr.end_program);
+        transition accept;
     }
 
 }
@@ -224,6 +229,10 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
+        packet.emit(hdr.program_metadata);
+        packet.emit(hdr.registers);
+        packet.emit(hdr.insns);
+        packet.emit(hdr.end_program);
     }
 }
 

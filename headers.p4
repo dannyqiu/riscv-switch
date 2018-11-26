@@ -61,4 +61,5 @@ struct headers {
     program_metadata_t          program_metadata;
     register_t[NUM_REGISTERS]   registers;
     insn_unknown_t[MAX_INSNS]   insns;
+    insn_unknown_t              end_program;
 }
