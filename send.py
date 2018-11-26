@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import sys
 import socket
 
@@ -225,7 +225,7 @@ def EndOfProgram(src=0, imm=0, **kwargs):
     return Instruction(opcode=-1, dst=-1, src=-1, target=-1, imm=-1, **kwargs)
 
 
-def make_program(pkt, insns: [Instruction]):
+def make_program(pkt, insns):
     pkt /= ProtoWrapper(type=PROTO_PROGRAM, src=IP().src, max_steps=0xFFFF)
     pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
@@ -243,7 +243,7 @@ def main():
     iface = get_if()
     addr = socket.gethostbyname(sys.argv[1])
 
-    pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff');
+    pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
     pkt = pkt / IP(dst=addr)
     pkt = pkt / UDP(sport=1234, dport=PROTOCOL_PORT)
     # Increase default recursion depth so scapy can handle longer programs
