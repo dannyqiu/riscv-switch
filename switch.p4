@@ -18,10 +18,9 @@
 *************************************************************************/
 
 parser ProgramParser(packet_in packet,
-                     out headers hdr,
+                     inout headers hdr,
                      inout metadata meta,
-                     inout standard_metadata_t standard_metadata,
-                     in bit<8> protocol) {
+                     inout standard_metadata_t standard_metadata) {
 
     bit<32> registers_to_parse;
     bit<32> insns_to_current;
@@ -30,7 +29,7 @@ parser ProgramParser(packet_in packet,
         packet.extract(hdr.program_metadata);
         registers_to_parse = NUM_REGISTERS;
         insns_to_current = hdr.program_metadata.pc;
-        transition select(protocol) {
+        transition select(hdr.ipv4.protocol) {
             PROTO_RAW_PROGRAM: parse_registers;
             PROTO_PROGRAM: parse_execution_metadata;
         }
@@ -131,7 +130,7 @@ parser MyParser(packet_in packet,
     }
 
     state parse_program {
-        program_parser.apply(packet, hdr, meta, standard_metadata, hdr.ipv4.protocol);
+        program_parser.apply(packet, hdr, meta, standard_metadata);
         transition accept;
     }
 
@@ -402,6 +401,8 @@ control MyIngress(inout headers hdr,
     table debug {
         key = {
             switch_role: exact;
+            num_execution_units: exact;
+            num_hosts: exact;
         }
         actions = {
             NoAction();
@@ -423,7 +424,8 @@ control MyIngress(inout headers hdr,
             hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
                 {
                     hdr.ethernet.srcAddr,
-                    hdr.ipv4.hdrChecksum
+                    hdr.ipv4.hdrChecksum,
+                    hdr.program_metadata.max_steps
                 }, num_execution_units);
             load_balance_map.apply();
         }
