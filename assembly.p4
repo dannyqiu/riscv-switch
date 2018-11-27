@@ -13,11 +13,12 @@ header register_t {
 }
 
 header program_metadata_t {
-    bit<32>   src;
     bit<32>   max_steps;
 }
 
 header program_execution_metadata_t {
+    // Ingress port to the load balancer from the source host
+    bit<9>    src;
     bit<32>   pc;
     bit<32>   steps;
     bit<32>   mem_namespace;

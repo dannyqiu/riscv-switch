@@ -412,6 +412,7 @@ control MyIngress(inout headers hdr,
             switch_role: exact;
             num_execution_units: exact;
             num_hosts: exact;
+            hdr.program_execution_metadata.pc: exact;
         }
         actions = {
             NoAction();
@@ -427,7 +428,10 @@ control MyIngress(inout headers hdr,
           && hdr.program_metadata.isValid()
           && !hdr.program_execution_metadata.isValid()) {
             // Add execution metadata header and perform load-balancing
+            hdr.ipv4.protocol = PROTO_PROGRAM;
             hdr.program_execution_metadata.setValid();
+            hdr.program_execution_metadata.src = standard_metadata.ingress_port;
+            hdr.program_execution_metadata.pc = 0;
             hdr.program_execution_metadata.steps = 0;
             hdr.program_execution_metadata.mem_namespace = hdr.ipv4.srcAddr;
             hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
