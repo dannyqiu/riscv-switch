@@ -29,7 +29,6 @@ class ProtoWrapper(Packet):
     name = 'ProtoWrapper'
     fields_desc = [
         IPField('src', '127.0.0.1'),
-        BitField('pc', 0, 32),
         BitField('max_steps', 0, 32),
     ]
 
@@ -227,7 +226,7 @@ def EndOfProgram(**kwargs):
 
 
 def make_program(pkt, insns):
-    pkt /= ProtoWrapper(src=IP(dst=LOAD_BALANCER_IP).src, pc=0, max_steps=1000)
+    pkt /= ProtoWrapper(src=IP(dst=LOAD_BALANCER_IP).src, max_steps=1000)
     pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
     for insn in insns:

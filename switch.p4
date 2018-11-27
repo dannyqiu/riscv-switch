@@ -27,8 +27,9 @@ parser ProgramParser(packet_in packet,
 
     state start {
         packet.extract(hdr.program_metadata);
+        meta.program_length = 0;
         registers_to_parse = NUM_REGISTERS;
-        insns_to_current = hdr.program_metadata.pc;
+        insns_to_current = 0;
         transition select(hdr.ipv4.protocol) {
             PROTO_RAW_PROGRAM: parse_registers;
             PROTO_PROGRAM: parse_execution_metadata;
@@ -37,6 +38,7 @@ parser ProgramParser(packet_in packet,
 
     state parse_execution_metadata {
         packet.extract(hdr.program_execution_metadata);
+        insns_to_current = hdr.program_execution_metadata.pc;
         transition parse_registers;
     }
 
@@ -65,6 +67,7 @@ parser ProgramParser(packet_in packet,
 
     state parse_insn {
         packet.extract(hdr.insns.next);
+        meta.program_length = meta.program_length + 1;
         insns_to_current = insns_to_current - 1;
         transition parse_insns;
     }
@@ -301,6 +304,10 @@ control MyIngress(inout headers hdr,
         SET_REG_OTHERWISE(r, 31, value)
     }
 
+    action advance_pc() {
+        hdr.program_execution_metadata.pc = hdr.program_execution_metadata.pc + 1;
+    }
+
     action insn_add() {
         insn_rtype_t add;
         bless_rtype(meta.current_insn, add);
@@ -309,6 +316,7 @@ control MyIngress(inout headers hdr,
         get_register(add.rs1, r1);
         get_register(add.rs2, r2);
         set_register(add.rd, r1 + r2);
+        advance_pc();
     }
 
     action insn_addi() {
@@ -317,6 +325,7 @@ control MyIngress(inout headers hdr,
         bit<32> r1;
         get_register(addi.rs1, r1);
         set_register(addi.rd, r1 + (bit<32>) addi.imm);
+        advance_pc();
     }
 
     table insn_opcode_exact {
@@ -332,9 +341,9 @@ control MyIngress(inout headers hdr,
             handle_itype;
             handle_stype;
             handle_utype;
-            NoAction();
+            advance_pc();
         }
-        default_action = NoAction();
+        default_action = advance_pc();
         const entries = {
             (0b0000000, 0b000, 0b0110011) : insn_add();
             // (0b0100000, 0b000, 0b0110011) : insn_sub();
@@ -432,9 +441,11 @@ control MyIngress(inout headers hdr,
         else if (switch_role == ROLE_EXECUTION_UNIT
           && meta.current_insn.isValid()) {
             insn_opcode_exact.apply();
-            // TODO: Forward to self if execution is not complete
-            //standard_metadata.egress_spec = standard_metadata.ingress_port;
-            //recirculate({meta, standard_metadata});
+            // Forward to self if execution is not complete
+            if (hdr.program_execution_metadata.pc < meta.program_length) {
+                standard_metadata.egress_spec = standard_metadata.ingress_port;
+                recirculate({meta, standard_metadata});
+            }
         }
         else if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
