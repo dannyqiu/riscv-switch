@@ -18,9 +18,10 @@
 *************************************************************************/
 
 parser ProgramParser(packet_in packet,
-                     inout headers hdr,
+                     out headers hdr,
                      inout metadata meta,
-                     inout standard_metadata_t standard_metadata) {
+                     inout standard_metadata_t standard_metadata,
+                     in bit<8> protocol) {
 
     bit<32> registers_to_parse;
     bit<32> insns_to_current;
@@ -29,7 +30,7 @@ parser ProgramParser(packet_in packet,
         packet.extract(hdr.program_metadata);
         registers_to_parse = NUM_REGISTERS;
         insns_to_current = hdr.program_metadata.pc;
-        transition select(hdr.ipv4.protocol) {
+        transition select(protocol) {
             PROTO_RAW_PROGRAM: parse_registers;
             PROTO_PROGRAM: parse_execution_metadata;
         }
@@ -130,7 +131,7 @@ parser MyParser(packet_in packet,
     }
 
     state parse_program {
-        program_parser.apply(packet, hdr, meta, standard_metadata);
+        program_parser.apply(packet, hdr, meta, standard_metadata, hdr.ipv4.protocol);
         transition accept;
     }
 
