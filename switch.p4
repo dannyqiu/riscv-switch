@@ -18,7 +18,7 @@
 *************************************************************************/
 
 parser ProgramParser(packet_in packet,
-                     out headers hdr,
+                     inout headers hdr,
                      inout metadata meta,
                      inout standard_metadata_t standard_metadata) {
 
