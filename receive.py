@@ -20,7 +20,7 @@ def main():
     iface = get_if()
     print "sniffing on %s" % iface
     sys.stdout.flush()
-    sniff(iface=iface, prn=handle_pkt)
+    sniff(filter="src host {}".format(LOAD_BALANCER_IP), iface=iface, prn=handle_pkt)
 
 
 if __name__ == '__main__':

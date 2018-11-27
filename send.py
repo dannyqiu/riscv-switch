@@ -11,13 +11,6 @@ import readline
 from headers import *
 
 
-PROTO_RAW_PROGRAM = 0x8F
-MAX_PROGRAM_LENGTH = 300
-
-LOAD_BALANCER_IP = '255.255.255.255'
-LOAD_BALANCER_MAC = 'ff:ff:ff:ff:ff:ff'
-
-
 def AddI(dst=0, src=0, imm=0, **kwargs):
     return Instruction(funct7=(imm >> 5), part1=((1 << 5 - 1) & imm), part2=src, funct3=0b000, part3=dst, opcode=0b0010011, **kwargs)
 

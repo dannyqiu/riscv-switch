@@ -424,31 +424,47 @@ control MyIngress(inout headers hdr,
     apply {
         configuration.apply();
         debug.apply();
-        if (switch_role == ROLE_LOAD_BALANCER
-          && hdr.program_metadata.isValid()
-          && !hdr.program_execution_metadata.isValid()) {
-            // Add execution metadata header and perform load-balancing
-            hdr.ipv4.protocol = PROTO_PROGRAM;
-            hdr.program_execution_metadata.setValid();
-            hdr.program_execution_metadata.src = standard_metadata.ingress_port;
-            hdr.program_execution_metadata.pc = 0;
-            hdr.program_execution_metadata.steps = 0;
-            hdr.program_execution_metadata.mem_namespace = hdr.ipv4.srcAddr;
-            hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
-                {
-                    hdr.ethernet.srcAddr,
-                    hdr.ipv4.hdrChecksum,
-                    hdr.program_metadata.max_steps
-                }, num_execution_units);
-            load_balance_map.apply();
+        if (switch_role == ROLE_LOAD_BALANCER && hdr.program_metadata.isValid()) {
+            if (!hdr.program_execution_metadata.isValid()) {
+                // Add execution metadata header and perform load-balancing
+                hdr.ipv4.protocol = PROTO_PROGRAM;
+                hdr.program_execution_metadata.setValid();
+                hdr.program_execution_metadata.src_port = standard_metadata.ingress_port;
+                hdr.program_execution_metadata.src_mac = hdr.ethernet.srcAddr;
+                hdr.program_execution_metadata.src_ipv4 = hdr.ipv4.srcAddr;
+                hdr.program_execution_metadata.pc = 0;
+                hdr.program_execution_metadata.steps = 0;
+                hdr.program_execution_metadata.mem_namespace = hdr.ipv4.srcAddr;
+                hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
+                    {
+                        hdr.ethernet.srcAddr,
+                        hdr.ipv4.hdrChecksum,
+                        hdr.program_metadata.max_steps
+                    }, num_execution_units);
+                load_balance_map.apply();
+            }
+            else {
+                // Forward executed program back to host
+                standard_metadata.egress_spec = hdr.program_execution_metadata.src_port;
+                hdr.ethernet.srcAddr = LOAD_BALANCER_MAC;
+                hdr.ethernet.dstAddr = hdr.program_execution_metadata.src_mac;
+                hdr.ipv4.srcAddr = LOAD_BALANCER_IP;
+                hdr.ipv4.dstAddr = hdr.program_execution_metadata.src_ipv4;
+                // Strip execution metadata
+                hdr.program_execution_metadata.setInvalid();
+                hdr.ipv4.protocol = PROTO_RAW_PROGRAM;
+            }
         }
-        else if (switch_role == ROLE_EXECUTION_UNIT
-          && meta.current_insn.isValid()) {
+        else if (switch_role == ROLE_EXECUTION_UNIT && meta.current_insn.isValid()) {
             insn_opcode_exact.apply();
             // Forward to self if execution is not complete
             if (hdr.program_execution_metadata.pc < meta.program_length) {
                 standard_metadata.egress_spec = standard_metadata.ingress_port;
                 recirculate({meta, standard_metadata});
+            }
+            // Forward back to load balancer when program execution is complete
+            else {
+                standard_metadata.egress_spec = LOAD_BALANCER_PORT;
             }
         }
         else if (hdr.ipv4.isValid()) {

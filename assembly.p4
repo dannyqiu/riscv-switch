@@ -4,6 +4,13 @@ const bit<8>  PROTO_PROGRAM = 0x90;
 const bit<32> NUM_REGISTERS = 32;
 const bit<32> MAX_INSNS = 300;
 
+// Load balancer is connected to all execution units via port 1
+const bit<9>  LOAD_BALANCER_PORT = 1;
+// Data store is connected to all execution units via port 2
+const bit<9>  DATASTORE_PORT = 2;
+const bit<48> LOAD_BALANCER_MAC = 0xFFFFFFFFFFFF;
+const bit<32> LOAD_BALANCER_IP = 0xFFFFFFFF;
+
 /*******************************************************************************
 *********************** M E T A D A T A ****************************************
 *******************************************************************************/
@@ -18,7 +25,13 @@ header program_metadata_t {
 
 header program_execution_metadata_t {
     // Ingress port to the load balancer from the source host
-    bit<9>    src;
+    bit<9>    src_port;
+    // Padding to make header word-aligned
+    bit<3>    reserved;
+    // MAC address of the source host
+    bit<48>   src_mac;
+    // IPv4 address of the source host
+    bit<32>   src_ipv4;
     bit<32>   pc;
     bit<32>   steps;
     bit<32>   mem_namespace;

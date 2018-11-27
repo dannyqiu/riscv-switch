@@ -5,6 +5,12 @@ from scapy.all import IP
 from scapy.fields import *
 
 
+PROTO_RAW_PROGRAM = 0x8F
+MAX_PROGRAM_LENGTH = 300
+
+LOAD_BALANCER_IP = '255.255.255.255'
+LOAD_BALANCER_MAC = 'ff:ff:ff:ff:ff:ff'
+
 def get_if():
     ifs = get_if_list()
     iface = [i for i in get_if_list() if "eth0" in i]
