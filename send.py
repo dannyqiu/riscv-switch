@@ -9,9 +9,11 @@ from scapy.fields import *
 import readline
 
 
-PROTO_PROGRAM = 0x00
-PROTOCOL_PORT = 4321
+PROTO_RAW_PROGRAM = 0x8F
 MAX_PROGRAM_LENGTH = 300
+
+LOAD_BALANCER_IP = '255.255.255.255'
+LOAD_BALANCER_MAC = 'ff:ff:ff:ff:ff:ff'
 
 
 def get_if():
@@ -28,7 +30,7 @@ class ProtoWrapper(Packet):
     fields_desc = [
         IPField('src', '127.0.0.1'),
         BitField('pc', 0, 32),
-        BitField('steps', 0, 32),
+        BitField('max_steps', 0, 32),
     ]
 
 
@@ -225,7 +227,7 @@ def EndOfProgram(**kwargs):
 
 
 def make_program(pkt, insns):
-    pkt /= ProtoWrapper(src=IP().src, pc=0, steps=0)
+    pkt /= ProtoWrapper(src=IP(dst=LOAD_BALANCER_IP).src, pc=0, max_steps=1000)
     pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
     for insn in insns:
@@ -235,15 +237,10 @@ def make_program(pkt, insns):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print('usage: send.py <destination>')
-        exit(1)
-
     iface = get_if()
-    addr = socket.gethostbyname(sys.argv[1])
 
-    pkt = Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
-    pkt = pkt / IP(dst=addr)
+    pkt = Ether(src=get_if_hwaddr(iface), dst=LOAD_BALANCER_MAC)
+    pkt = pkt / IP(proto=PROTO_RAW_PROGRAM, dst=LOAD_BALANCER_IP)
     # Increase default recursion depth so scapy can handle longer programs
     sys.setrecursionlimit(10000)
     pkt = make_program(pkt, [

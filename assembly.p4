@@ -1,4 +1,5 @@
-const bit<8>  PROTO_PROGRAM = 0x0;
+const bit<8>  PROTO_RAW_PROGRAM = 0x8F;
+const bit<8>  PROTO_PROGRAM = 0x90;
 
 const bit<32> NUM_REGISTERS = 32;
 const bit<32> MAX_INSNS = 300;
@@ -14,7 +15,12 @@ header register_t {
 header program_metadata_t {
     bit<32>   src;
     bit<32>   pc;
+    bit<32>   max_steps;
+}
+
+header program_execution_metadata_t {
     bit<32>   steps;
+    bit<32>   mem_namespace;
 }
 
 /*******************************************************************************

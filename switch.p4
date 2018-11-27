@@ -8,13 +8,19 @@
 #define SET_REG_PRIMARY(r, n, v) if (r == n) { hdr.registers[n].value = v; }
 #define SET_REG_OTHERWISE(r, n, v) else if (r == n) { hdr.registers[n].value = v; }
 
+// Role IDs
+#define ROLE_LOAD_BALANCER 0
+#define ROLE_EXECUTION_UNIT 1
+#define ROLE_DATASTORE 2
+
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
 
 parser ProgramParser(packet_in packet,
                      out headers hdr,
-                     inout metadata meta) {
+                     inout metadata meta,
+                     inout standard_metadata_t standard_metadata) {
 
     bit<32> registers_to_parse;
     bit<32> insns_to_current;
@@ -23,6 +29,14 @@ parser ProgramParser(packet_in packet,
         packet.extract(hdr.program_metadata);
         registers_to_parse = NUM_REGISTERS;
         insns_to_current = hdr.program_metadata.pc;
+        transition select(hdr.ipv4.protocol) {
+            PROTO_RAW_PROGRAM: parse_registers;
+            PROTO_PROGRAM: parse_execution_metadata;
+        }
+    }
+
+    state parse_execution_metadata {
+        packet.extract(hdr.program_execution_metadata);
         transition parse_registers;
     }
 
@@ -99,6 +113,7 @@ parser MyParser(packet_in packet,
         transition select(hdr.ipv4.protocol) {
             PROTO_TCP: parse_tcp;
             PROTO_UDP: parse_udp;
+            PROTO_RAW_PROGRAM: parse_program;
             PROTO_PROGRAM: parse_program;
             default: accept;
         }
@@ -115,7 +130,7 @@ parser MyParser(packet_in packet,
     }
 
     state parse_program {
-        program_parser.apply(packet, hdr, meta);
+        program_parser.apply(packet, hdr, meta, standard_metadata);
         transition accept;
     }
 
@@ -137,6 +152,10 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+    bit<2> switch_role = ROLE_EXECUTION_UNIT;
+    bit<32> num_execution_units = 0;
+    bit<32> num_hosts = 0;
+    bit<32> target_execution_node = 0;
 
     action drop() {
         mark_to_drop();
@@ -346,9 +365,73 @@ control MyIngress(inout headers hdr,
         }
     }
 
+    action configure_switch(bit<2> role, bit<32> n_execution_units, bit<32> n_hosts) {
+        switch_role = role;
+        num_execution_units = n_execution_units;
+        num_hosts = n_hosts;
+    }
+
+    table configuration {
+        key = {
+        }
+        actions = {
+            configure_switch();
+            drop;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
+    action forward_to_execution_node(bit<9> port) {
+        standard_metadata.egress_spec = port;
+    }
+
+    table load_balance_map {
+        key = {
+            target_execution_node: exact;
+        }
+        actions = {
+            forward_to_execution_node();
+            drop;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
+    table debug {
+        key = {
+            switch_role: exact;
+        }
+        actions = {
+            NoAction();
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
     apply {
-        if (meta.current_insn.isValid()) {
+        configuration.apply();
+        debug.apply();
+        if (switch_role == ROLE_LOAD_BALANCER
+          && hdr.program_metadata.isValid()
+          && !hdr.program_execution_metadata.isValid()) {
+            // Add execution metadata header and perform load-balancing
+            hdr.program_execution_metadata.setValid();
+            hdr.program_execution_metadata.steps = 0;
+            hdr.program_execution_metadata.mem_namespace = hdr.ipv4.srcAddr;
+            hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
+                {
+                    hdr.ethernet.srcAddr,
+                    hdr.ipv4.hdrChecksum
+                }, num_execution_units);
+            load_balance_map.apply();
+        }
+        else if (switch_role == ROLE_EXECUTION_UNIT
+          && meta.current_insn.isValid()) {
             insn_opcode_exact.apply();
+            // TODO: Forward to self if execution is not complete
+            //standard_metadata.egress_spec = standard_metadata.ingress_port;
+            //recirculate({meta, standard_metadata});
         }
         else if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
@@ -388,6 +471,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
         packet.emit(hdr.program_metadata);
+        packet.emit(hdr.program_execution_metadata);
         packet.emit(hdr.registers);
         packet.emit(hdr.insns);
         packet.emit(hdr.end_program);

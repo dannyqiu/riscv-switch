@@ -58,8 +58,9 @@ struct headers {
     tcp_t        tcp;
     udp_t        udp;
 
-    program_metadata_t          program_metadata;
-    register_t[NUM_REGISTERS]   registers;
-    insn_unknown_t[MAX_INSNS]   insns;
-    insn_unknown_t              end_program;
+    program_metadata_t            program_metadata;
+    program_execution_metadata_t  program_execution_metadata;
+    register_t[NUM_REGISTERS]     registers;
+    insn_unknown_t[MAX_INSNS]     insns;
+    insn_unknown_t                end_program;
 }
