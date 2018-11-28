@@ -32,18 +32,36 @@ parser ProgramParser(packet_in packet,
         transition select(hdr.ipv4.protocol) {
             PROTO_RAW_PROGRAM: parse_metadata;
             PROTO_PROGRAM: parse_execution_metadata;
+            PROTO_STORE_REQUEST: parse_store_request_metadata;
+            PROTO_LOAD_REQUEST: parse_load_request_metadata;
+            PROTO_LOAD_RESPONSE: parse_load_response_metadata;
         }
     }
 
-    state parse_metadata {
-        packet.extract(hdr.program_metadata);
-        transition parse_registers;
+    state parse_store_request_metadata {
+        packet.extract(hdr.store_request_metadata);
+        transition parse_execution_metadata;
+    }
+
+    state parse_load_request_metadata {
+        packet.extract(hdr.load_request_metadata);
+        transition parse_execution_metadata;
+    }
+
+    state parse_load_response_metadata {
+        packet.extract(hdr.load_response_metadata);
+        transition parse_execution_metadata;
     }
 
     state parse_execution_metadata {
         packet.extract(hdr.program_execution_metadata);
         insns_to_current = hdr.program_execution_metadata.pc;
         transition parse_metadata;
+    }
+
+    state parse_metadata {
+        packet.extract(hdr.program_metadata);
+        transition parse_registers;
     }
 
     state parse_registers {

@@ -59,6 +59,9 @@ struct headers {
     tcp_t        tcp;
     udp_t        udp;
 
+    store_request_metadata_t      store_request_metadata;
+    load_request_metadata_t       load_request_metadata;
+    load_response_metadata_t      load_response_metadata;
     program_execution_metadata_t  program_execution_metadata;
     program_metadata_t            program_metadata;
     register_t[NUM_REGISTERS]     registers;
