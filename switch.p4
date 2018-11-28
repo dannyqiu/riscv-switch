@@ -513,10 +513,28 @@ control MyIngress(inout headers hdr,
             }
         }
         else if (switch_role == ROLE_DATASTORE) {
-            if (hdr.load_response_metadata.isValid()) {
+            if (standard_metadata.ingress_port == DATASTORE_HOST_PORT) {
                 // Forward back to the source execution unit
-                target_execution_node_id = hdr.load_response_metadata.execution_node;
+                // If not load response, then strip load/store request header before forwarding back
+                if (hdr.load_response_metadata.isValid()) {
+                    target_execution_node_id = hdr.load_response_metadata.execution_node;
+                }
+                else if (hdr.load_request_metadata.isValid()) {
+                    target_execution_node_id = hdr.load_request_metadata.execution_node;
+                    hdr.load_request_metadata.setInvalid();
+                }
+                else if (hdr.store_request_metadata.isValid()) {
+                    target_execution_node_id = hdr.store_request_metadata.execution_node;
+                    hdr.store_request_metadata.setInvalid();
+                }
+                else {
+                    drop();
+                }
                 datastore_response_map.apply();
+            }
+            else {
+                // Forward to data store host
+                standard_metadata.egress_spec = DATASTORE_HOST_PORT;
             }
         }
         else if (hdr.ipv4.isValid()) {

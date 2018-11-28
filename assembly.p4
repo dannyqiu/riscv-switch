@@ -7,10 +7,13 @@ const bit<8>  PROTO_LOAD_RESPONSE = 0x93;
 const bit<32> NUM_REGISTERS = 32;
 const bit<32> MAX_INSNS = 300;
 
-// Load balancer is connected to all execution units via port 1
+// Load balancer is always connected to all execution units via port 1
 const bit<9>  LOAD_BALANCER_PORT = 1;
-// Data store is connected to all execution units via port 2
+// Data store is always connected to all execution units via port 2
 const bit<9>  DATASTORE_PORT = 2;
+// Data store host is always connected to the data store switch via port 1
+const bit<9>  DATASTORE_HOST_PORT = 1;
+
 const bit<48> LOAD_BALANCER_MAC = 0x0000FF000000;
 const bit<32> LOAD_BALANCER_IP = 0x0AFFFF00;
 const bit<48> DATASTORE_MAC = 0x0000FF000001;
