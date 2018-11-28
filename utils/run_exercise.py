@@ -182,7 +182,7 @@ class ExerciseRunner:
             print(' '.join(items))
 
     def __init__(self, topo_file, log_dir, pcap_dir,
-                       switch_json, bmv2_exe='simple_switch', quiet=False):
+                       switch_json, bmv2_exe='simple_switch', controller=None, quiet=False):
         """ Initializes some attributes and reads the topology json. Does not
             actually run the exercise. Use run_exercise() for that.
 
@@ -214,6 +214,7 @@ class ExerciseRunner:
         self.pcap_dir = pcap_dir
         self.switch_json = switch_json
         self.bmv2_exe = bmv2_exe
+        self.controller = controller
 
 
     def run_exercise(self):
@@ -372,6 +373,9 @@ class ExerciseRunner:
             print(' for example run:  cat %s/s1-p4runtime-requests.txt' % self.log_dir)
             print('')
 
+        if self.controller:
+            os.system(self.controller)
+
         CLI(self.net)
 
 
@@ -389,6 +393,8 @@ def get_args():
     parser.add_argument('-j', '--switch_json', type=str, required=False)
     parser.add_argument('-b', '--behavioral-exe', help='Path to behavioral executable',
                                 type=str, required=False, default='simple_switch')
+    parser.add_argument('-c', '--controller', help='Path to controller script for setup',
+                                type=str, required=False, default=None)
     return parser.parse_args()
 
 
@@ -398,7 +404,6 @@ if __name__ == '__main__':
 
     args = get_args()
     exercise = ExerciseRunner(args.topo, args.log_dir, args.pcap_dir,
-                              args.switch_json, args.behavioral_exe, args.quiet)
+                              args.switch_json, args.behavioral_exe, args.controller, args.quiet)
 
     exercise.run_exercise()
-

@@ -7,6 +7,7 @@ LOG_DIR = logs
 TOPO = topology.json
 P4C = p4c-bm2-ss
 RUN_SCRIPT = utils/run_exercise.py
+CONTROLLER_SCRIPT = ./mycontroller.py
 
 source := switch.p4
 outfile := $(source:.p4=.json)
@@ -15,7 +16,7 @@ compiled_json := $(BUILD_DIR)/$(outfile)
 all: build run
 
 run:
-	sudo python $(RUN_SCRIPT) -t $(TOPO) -j $(compiled_json) -b $(BMV2)
+	sudo python $(RUN_SCRIPT) -t $(TOPO) -j $(compiled_json) -b $(BMV2) -c $(CONTROLLER_SCRIPT)
 
 stop:
 	sudo mn -c
