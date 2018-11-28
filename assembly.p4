@@ -34,8 +34,8 @@ header program_metadata_t {
 header program_execution_metadata_t {
     // Ingress port to the load balancer from the source host
     bit<9>    src_port;
-    // Padding to make header word-aligned
-    bit<3>    reserved;
+    // Padding to make header byte-aligned
+    bit<7>    reserved;
     // MAC address of the source host
     bit<48>   src_mac;
     // IPv4 address of the source host
@@ -55,7 +55,7 @@ header store_request_metadata_t {
 header load_request_metadata_t {
     bit<32> address;
     bit<5> register;
-    // Padding to make header word-aligned
+    // Padding to make header byte-aligned
     bit<3> reserved;
     // ID of the requesting execution node
     bit<32> execution_node;
@@ -64,7 +64,7 @@ header load_request_metadata_t {
 header load_response_metadata_t {
     bit<32> value;
     bit<5> register;
-    // Padding to make header word-aligned
+    // Padding to make header byte-aligned
     bit<3> reserved;
     // ID of the requesting execution node
     bit<32> execution_node;

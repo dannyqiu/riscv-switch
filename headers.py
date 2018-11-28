@@ -16,7 +16,7 @@ MAX_PROGRAM_LENGTH = 300
 LOAD_BALANCER_IP = '10.255.255.0'
 LOAD_BALANCER_MAC = '00:00:ff:00:00:00'
 DATASTORE_IP = '10.255.255.1'
-LOAD_BALANCER_MAC = '00:00:ff:00:00:01'
+DATASTORE_MAC = '00:00:ff:00:00:01'
 
 def get_if():
     ifs = get_if_list()
@@ -38,7 +38,7 @@ class ProgramExecutionMetadata(Packet):
     name = 'ProgramExecutionMetadata'
     fields_desc = [
         BitField('src_port', 0, 9),
-        BitField('reserved', 0, 3),
+        BitField('reserved', 0, 7),
         BitField('src_mac', 0, 48),
         BitField('src_ipv4', 0, 32),
         BitField('pc', 0, 32),
