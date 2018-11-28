@@ -8,8 +8,10 @@ const bit<32> MAX_INSNS = 300;
 const bit<9>  LOAD_BALANCER_PORT = 1;
 // Data store is connected to all execution units via port 2
 const bit<9>  DATASTORE_PORT = 2;
-const bit<48> LOAD_BALANCER_MAC = 0xFFFFFFFFFFFF;
-const bit<32> LOAD_BALANCER_IP = 0xFFFFFFFF;
+const bit<48> LOAD_BALANCER_MAC = 0x0000FF000000;
+const bit<32> LOAD_BALANCER_IP = 0x0AFFFF00;
+const bit<48> DATASTORE_MAC = 0x0000FF000001;
+const bit<32> DATASTORE_IP = 0x0AFFFF01;
 
 /*******************************************************************************
 *********************** M E T A D A T A ****************************************
