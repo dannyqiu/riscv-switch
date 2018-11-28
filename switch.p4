@@ -89,13 +89,13 @@ parser ProgramParser(packet_in packet,
     // save current PC instruction during parsing, since we cannot access arrays
     // with non-constant values in the other stages
     state set_current_insn {
+        meta.current_insn.setValid();
         meta.current_insn.funct7 = packet.lookahead<bit<32>>()[31:25];
         meta.current_insn.part1 = packet.lookahead<bit<32>>()[24:20];
         meta.current_insn.part2 = packet.lookahead<bit<32>>()[19:15];
         meta.current_insn.funct3 = packet.lookahead<bit<32>>()[14:12];
         meta.current_insn.part3 = packet.lookahead<bit<32>>()[11:7];
         meta.current_insn.opcode = packet.lookahead<bit<32>>()[6:0];
-        meta.current_insn.setValid();
         transition parse_insn;
     }
 
