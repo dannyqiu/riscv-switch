@@ -11,20 +11,39 @@ import readline
 from headers import *
 
 
-def main():
-    iface = get_if()
+iface = get_if()
 
+
+def load_request(mem_namespace, address, register, execution_node):
     pkt = Ether(src=get_if_hwaddr(iface), dst=DATASTORE_MAC)
-    pkt = pkt / IP(proto=PROTO_STORE_REQUEST, dst=DATASTORE_IP)
-    pkt /= StoreRequestMetadata(address=0, value=1337, execution_node=0)
-    pkt /= ProgramExecutionMetadata()
+    pkt = pkt / IP(proto=PROTO_LOAD_REQUEST, dst=DATASTORE_IP)
+    pkt /= LoadRequestMetadata(address=address, register=register, execution_node=execution_node)
+    pkt /= ProgramExecutionMetadata(mem_namespace=mem_namespace)
     pkt /= ProgramMetadata(max_steps=1000)
     pkt /= Registers()
-    pkt /= AddI(dst=3, src=0, imm=42)
-    pkt /= Add(dst=0, src=0, target=0)
     pkt /= EndOfProgram()
+    return pkt
+
+
+def store_request(mem_namespace, address, value, execution_node):
+    pkt = Ether(src=get_if_hwaddr(iface), dst=DATASTORE_MAC)
+    pkt = pkt / IP(proto=PROTO_STORE_REQUEST, dst=DATASTORE_IP)
+    pkt /= StoreRequestMetadata(address=address, value=value, execution_node=execution_node)
+    pkt /= ProgramExecutionMetadata(mem_namespace=mem_namespace)
+    pkt /= ProgramMetadata(max_steps=1000)
+    pkt /= Registers()
+    pkt /= EndOfProgram()
+    return pkt
+
+
+def main():
     # Increase default recursion depth so scapy can handle longer programs
     sys.setrecursionlimit(10000)
+    pkt = store_request(0xdeadbeef, 4, 1337, 0)
+    hexdump(pkt)
+    pkt.show2()
+    sendp(pkt, iface=iface, verbose=False)
+    pkt = load_request(0xdeadbeef, 4, 5, 0)
     hexdump(pkt)
     pkt.show2()
     sendp(pkt, iface=iface, verbose=False)
