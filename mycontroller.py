@@ -84,6 +84,7 @@ def main(p4info_file_path, bmv2_file_path, topo_file_path):
         num_execution_units = len(switches) - 2
         num_hosts = len(mn_topo.hosts())
         execution_nodes = [switch for switch in switches if switches[switch].name not in [LOAD_BALANCER_SWITCH, DATASTORE_SWITCH]]
+        switch_ids = dict([(switches[switch].name, id) for (id, switch) in enumerate(switches)])
         # Assign roles to switches
         for switch in switches:
             switch_name = switches[switch].name
@@ -95,7 +96,7 @@ def main(p4info_file_path, bmv2_file_path, topo_file_path):
                     table_entry = p4info_helper.buildTableEntry(
                         table_name="MyIngress.load_balance_map",
                         match_fields={
-                            "target_execution_node": idx
+                            "target_execution_node_idx": idx
                         },
                         action_name="MyIngress.forward_to_execution_node",
                         action_params={
@@ -105,12 +106,27 @@ def main(p4info_file_path, bmv2_file_path, topo_file_path):
                     switches[switch].WriteTableEntry(table_entry)
             elif switch_name == DATASTORE_SWITCH:
                 role = ROLE_DATASTORE
+                for execution_node in execution_nodes:
+                    # Add entries to datastore response mapping
+                    table_entry = p4info_helper.buildTableEntry(
+                        table_name="MyIngress.datastore_response_map",
+                        match_fields={
+                            "target_execution_node_id": switch_ids[switches[execution_node].name],
+                        },
+                        action_name="MyIngress.forward_to_execution_node",
+                        action_params={
+                            "port": mn_topo.port(switch, execution_node)[0],
+                        }
+                    )
+                    switches[switch].WriteTableEntry(table_entry)
+
             table_entry = p4info_helper.buildTableEntry(
                 table_name="MyIngress.configuration",
                 match_fields={
                 },
                 action_name="MyIngress.configure_switch",
                 action_params={
+                    "id": switch_ids[switch_name],
                     "role": role,
                     "n_execution_units": num_execution_units,
                     "n_hosts": num_hosts,

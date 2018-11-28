@@ -177,10 +177,12 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+    bit<32> switch_id = 0;
     bit<2> switch_role = ROLE_EXECUTION_UNIT;
     bit<32> num_execution_units = 0;
     bit<32> num_hosts = 0;
-    bit<32> target_execution_node = 0;
+    bit<32> target_execution_node_idx = 0;
+    bit<32> target_execution_node_id = 0;
 
     action drop() {
         mark_to_drop();
@@ -396,7 +398,8 @@ control MyIngress(inout headers hdr,
         }
     }
 
-    action configure_switch(bit<2> role, bit<32> n_execution_units, bit<32> n_hosts) {
+    action configure_switch(bit<32> id, bit<2> role, bit<32> n_execution_units, bit<32> n_hosts) {
+        switch_id = id;
         switch_role = role;
         num_execution_units = n_execution_units;
         num_hosts = n_hosts;
@@ -419,7 +422,19 @@ control MyIngress(inout headers hdr,
 
     table load_balance_map {
         key = {
-            target_execution_node: exact;
+            target_execution_node_idx: exact;
+        }
+        actions = {
+            forward_to_execution_node();
+            drop;
+        }
+        size = 1024;
+        default_action = drop();
+    }
+
+    table datastore_response_map {
+        key = {
+            target_execution_node_id: exact;
         }
         actions = {
             forward_to_execution_node();
@@ -431,6 +446,7 @@ control MyIngress(inout headers hdr,
 
     table debug {
         key = {
+            switch_id: exact;
             switch_role: exact;
             num_execution_units: exact;
             num_hosts: exact;
@@ -457,7 +473,7 @@ control MyIngress(inout headers hdr,
                 hdr.program_execution_metadata.pc = 0;
                 hdr.program_execution_metadata.steps = 0;
                 hdr.program_execution_metadata.mem_namespace = hdr.ipv4.srcAddr;
-                hash(target_execution_node, HashAlgorithm.crc16, (bit<1>) 0,
+                hash(target_execution_node_idx, HashAlgorithm.crc16, (bit<1>) 0,
                     {
                         hdr.ethernet.srcAddr,
                         hdr.ipv4.hdrChecksum,
@@ -478,6 +494,11 @@ control MyIngress(inout headers hdr,
             }
         }
         else if (switch_role == ROLE_EXECUTION_UNIT && meta.current_insn.isValid()) {
+            // Apply load response if applicable
+            if (hdr.load_response_metadata.isValid()) {
+                set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
+                hdr.load_response_metadata.setInvalid();
+            }
             insn_opcode_exact.apply();
             hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
             // Forward to self if execution is not complete
@@ -489,6 +510,13 @@ control MyIngress(inout headers hdr,
             // Forward back to load balancer when program execution is complete
             else {
                 standard_metadata.egress_spec = LOAD_BALANCER_PORT;
+            }
+        }
+        else if (switch_role == ROLE_DATASTORE) {
+            if (hdr.load_response_metadata.isValid()) {
+                // Forward back to the source execution unit
+                target_execution_node_id = hdr.load_response_metadata.execution_node;
+                datastore_response_map.apply();
             }
         }
         else if (hdr.ipv4.isValid()) {

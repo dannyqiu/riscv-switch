@@ -52,6 +52,7 @@ class StoreRequestMetadata(Packet):
     fields_desc = [
         BitField('address', 0, 32),
         BitField('value', 0, 32),
+        BitField('execution_node', 0, 32),
     ]
 
 
@@ -61,6 +62,7 @@ class LoadRequestMetadata(Packet):
         BitField('address', 0, 32),
         BitField('register', 0, 5),
         BitField('reserved', 0, 3),
+        BitField('execution_node', 0, 32),
     ]
 
 
@@ -70,6 +72,7 @@ class LoadResponseMetadata(Packet):
         BitField('value', 0, 32),
         BitField('register', 0, 5),
         BitField('reserved', 0, 3),
+        BitField('execution_node', 0, 32),
     ]
 
 

@@ -45,6 +45,8 @@ header program_execution_metadata_t {
 header store_request_metadata_t {
     bit<32> address;
     bit<32> value;
+    // ID of the requesting execution node
+    bit<32> execution_node;
 }
 
 header load_request_metadata_t {
@@ -52,6 +54,8 @@ header load_request_metadata_t {
     bit<5> register;
     // Padding to make header word-aligned
     bit<3> reserved;
+    // ID of the requesting execution node
+    bit<32> execution_node;
 }
 
 header load_response_metadata_t {
@@ -59,6 +63,8 @@ header load_response_metadata_t {
     bit<5> register;
     // Padding to make header word-aligned
     bit<3> reserved;
+    // ID of the requesting execution node
+    bit<32> execution_node;
 }
 
 /*******************************************************************************
