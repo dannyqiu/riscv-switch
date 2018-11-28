@@ -27,7 +27,6 @@ parser ProgramParser(packet_in packet,
 
     state start {
         insns_to_current = 0;
-        meta.program_length = 0;
         registers_to_parse = NUM_REGISTERS;
         transition select(hdr.ipv4.protocol) {
             PROTO_RAW_PROGRAM: parse_metadata;
@@ -89,7 +88,6 @@ parser ProgramParser(packet_in packet,
 
     state parse_insn {
         packet.extract(hdr.insns.next);
-        meta.program_length = meta.program_length + 1;
         insns_to_current = insns_to_current - 1;
         transition parse_insns;
     }
@@ -493,21 +491,26 @@ control MyIngress(inout headers hdr,
                 hdr.ipv4.protocol = PROTO_RAW_PROGRAM;
             }
         }
-        else if (switch_role == ROLE_EXECUTION_UNIT && meta.current_insn.isValid()) {
-            // Apply load response if applicable
-            if (hdr.load_response_metadata.isValid()) {
-                set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
-                hdr.load_response_metadata.setInvalid();
+        else if (switch_role == ROLE_EXECUTION_UNIT) {
+            if (meta.current_insn.isValid()) {
+                // Apply load response if applicable
+                if (hdr.load_response_metadata.isValid()) {
+                    set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
+                    hdr.load_response_metadata.setInvalid();
+                }
+                insn_opcode_exact.apply();
+                hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
+                // Forward to self if execution is not complete
+                if (hdr.program_execution_metadata.steps < hdr.program_metadata.max_steps) {
+                    standard_metadata.egress_spec = standard_metadata.ingress_port;
+                    recirculate({meta, standard_metadata});
+                }
+                // Forward back to load balancer when execution steps are exhausted
+                else {
+                    standard_metadata.egress_spec = LOAD_BALANCER_PORT;
+                }
             }
-            insn_opcode_exact.apply();
-            hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
-            // Forward to self if execution is not complete
-            if ((hdr.program_execution_metadata.pc >> 2) < meta.program_length
-              && hdr.program_execution_metadata.steps < hdr.program_metadata.max_steps) {
-                standard_metadata.egress_spec = standard_metadata.ingress_port;
-                recirculate({meta, standard_metadata});
-            }
-            // Forward back to load balancer when program execution is complete
+            // Forward back to load balancer if no more instructions to execute
             else {
                 standard_metadata.egress_spec = LOAD_BALANCER_PORT;
             }

@@ -50,7 +50,6 @@ header udp_t {
 
 struct metadata {
     insn_unknown_t   current_insn;
-    bit<32>          program_length;
 }
 
 struct headers {
