@@ -2,9 +2,7 @@
 import sys
 import struct
 
-from scapy.all import sniff, sendp, hexdump, get_if_list, get_if_hwaddr, bind_layers, split_layers
-from scapy.all import Packet
-from scapy.all import IP, UDP, Raw, Ether
+from scapy.all import sniff, hexdump
 from scapy.fields import *
 
 from headers import *
@@ -18,7 +16,7 @@ def handle_pkt(pkt):
 
 def main():
     iface = get_if()
-    print "sniffing on %s" % iface
+    print("sniffing on {}".format(iface))
     sys.stdout.flush()
     sniff(filter="src host {}".format(LOAD_BALANCER_IP), iface=iface, prn=handle_pkt)
 

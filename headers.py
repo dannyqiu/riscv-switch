@@ -1,4 +1,6 @@
 #!/usr/bin/env python2
+from __future__ import print_function
+
 from scapy.all import get_if_list, bind_layers
 from scapy.all import Packet, Raw
 from scapy.all import IP

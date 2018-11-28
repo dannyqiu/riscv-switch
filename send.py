@@ -2,11 +2,9 @@
 import sys
 import socket
 
-from scapy.all import sendp, send, get_if_list, get_if_hwaddr, bind_layers
-from scapy.all import Packet, Raw
-from scapy.all import Ether, IP, UDP
+from scapy.all import sendp, hexdump, get_if_hwaddr
+from scapy.all import Ether, IP
 from scapy.fields import *
-import readline
 
 from headers import *
 
