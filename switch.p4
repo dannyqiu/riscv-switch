@@ -55,7 +55,7 @@ parser ProgramParser(packet_in packet,
 
     state parse_execution_metadata {
         packet.extract(hdr.program_execution_metadata);
-        insns_to_current = hdr.program_execution_metadata.pc;
+        insns_to_current = hdr.program_execution_metadata.pc >> 2;
         transition parse_metadata;
     }
 
@@ -329,7 +329,7 @@ control MyIngress(inout headers hdr,
     }
 
     action advance_pc() {
-        hdr.program_execution_metadata.pc = hdr.program_execution_metadata.pc + 1;
+        hdr.program_execution_metadata.pc = hdr.program_execution_metadata.pc + 4;
     }
 
     action insn_add() {
