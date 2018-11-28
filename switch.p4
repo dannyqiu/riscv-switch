@@ -86,12 +86,6 @@ parser ProgramParser(packet_in packet,
         }
     }
 
-    state parse_insn {
-        packet.extract(hdr.insns.next);
-        insns_to_current = insns_to_current - 1;
-        transition parse_insns;
-    }
-
     // save current PC instruction during parsing, since we cannot access arrays
     // with non-constant values in the other stages
     state set_current_insn {
@@ -103,6 +97,12 @@ parser ProgramParser(packet_in packet,
         meta.current_insn.opcode = packet.lookahead<bit<32>>()[6:0];
         meta.current_insn.setValid();
         transition parse_insn;
+    }
+
+    state parse_insn {
+        packet.extract(hdr.insns.next);
+        insns_to_current = insns_to_current - 1;
+        transition parse_insns;
     }
 
     state parse_end_program {
@@ -175,6 +175,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
     bit<32> switch_id = 0;
     bit<2> switch_role = ROLE_EXECUTION_UNIT;
     bit<32> num_execution_units = 0;
@@ -350,7 +351,7 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
-    table insn_opcode_exact {
+    table insn_opcode {
         key = {
             meta.current_insn.funct7: ternary;
             meta.current_insn.funct3: ternary;
@@ -498,7 +499,7 @@ control MyIngress(inout headers hdr,
                     set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
                     hdr.load_response_metadata.setInvalid();
                 }
-                insn_opcode_exact.apply();
+                insn_opcode.apply();
                 hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
                 // Forward to self if execution is not complete
                 if (hdr.program_execution_metadata.steps < hdr.program_metadata.max_steps) {

@@ -74,15 +74,6 @@ header load_response_metadata_t {
 *********************** A S S E M B L Y ****************************************
 *******************************************************************************/
 
-const bit<8> ADD  = 0b00000000;
-const bit<8> ADDI = 0b10000000;
-const bit<8> SUB  = 0b00000001;
-const bit<8> SUBI = 0b10000001;
-const bit<8> MUL  = 0b00000010;
-const bit<8> MULI = 0b10000010;
-const bit<8> DIV  = 0b00000011;
-const bit<8> DIVI = 0b10000011;
-
 header insn_unknown_t {
     bit<7>  funct7;
     bit<5>  part1;
