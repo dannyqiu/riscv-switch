@@ -275,22 +275,6 @@ control MyIngress(inout headers hdr,
         }
     }
 
-    action handle_rtype() {
-        exit;
-    }
-
-    action handle_itype() {
-        exit;
-    }
-
-    action handle_stype() {
-        exit;
-    }
-
-    action handle_utype() {
-        exit;
-    }
-
     action get_register(in bit<5> r, out bit<32> value) {
         value = 0;
         GET_REG_PRIMARY(r, 0, value)
@@ -398,10 +382,6 @@ control MyIngress(inout headers hdr,
         actions = {
             insn_add;
             insn_addi;
-            handle_rtype;
-            handle_itype;
-            handle_stype;
-            handle_utype;
             advance_pc();
         }
         default_action = advance_pc();
@@ -418,20 +398,20 @@ control MyIngress(inout headers hdr,
             // (0b0000000, 0b001, 0b0110011) : insn_sll();
             // (0b0000001, 0b000, 0b0110011) : insn_mul();
 
-            (_, _, 0b0110011) : handle_rtype(); // generic rtype
+            // (_, _, 0b0110011) : handle_rtype(); // generic rtype
 
             (_, 0b000, 0b0010011) : insn_addi();
 
-            (_, _, 0b0000011) : handle_itype(); // LW
-            (_, _, 0b1100111) : handle_itype(); // JR / JALR
-            (_, _, 0b0010011) : handle_itype(); // generic itype
+            // (_, _, 0b0000011) : handle_itype(); // LW
+            // (_, _, 0b1100111) : handle_itype(); // JR / JALR
+            // (_, _, 0b0010011) : handle_itype(); // generic itype
 
-            (_, _, 0b0100011) : handle_stype(); // SW
-            (_, _, 0b1100011) : handle_stype(); // generic branch
+            // (_, _, 0b0100011) : handle_stype(); // SW
+            // (_, _, 0b1100011) : handle_stype(); // generic branch
 
-            (_, _, 0b0010111) : handle_utype(); // AUIPC
-            (_, _, 0b0110111) : handle_utype(); // LUI
-            (_, _, 0b1101111) : handle_utype(); // JAL
+            // (_, _, 0b0010111) : handle_utype(); // AUIPC
+            // (_, _, 0b0110111) : handle_utype(); // LUI
+            // (_, _, 0b1101111) : handle_utype(); // JAL
         }
     }
 
