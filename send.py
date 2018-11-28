@@ -17,10 +17,14 @@ def main():
     # Increase default recursion depth so scapy can handle longer programs
     sys.setrecursionlimit(10000)
     pkt = make_program(pkt, [
-        AddI(dst=3, src=0, imm=42),
-        Add(dst=0, src=0, target=0),
-        # Sub(dst=0, src=0, target=0),
-        # SubI(dst=0, src=0, imm=42),
+        AddI(dst=1, src=0, imm=42),      # r1 = 42
+        AddI(dst=2, src=0, imm=31),      # r2 = 31
+        Add(dst=3, src=1, target=1),     # r3 = 84
+        Sub(dst=4, src=3, target=1),     # r4 = 42
+        And(dst=5, src=1, target=2),     # r5 = 10
+        Or(dst=6, src=1, target=2),      # r6 = 63
+        Xor(dst=7, src=1, target=2),     # r7 = 53
+        AndI(dst=8, src=1, imm=8),       # r8 = 8
         # Mul(dst=0, src=0, target=0),
         # MulI(dst=0, src=0, imm=42),
         # Div(dst=0, src=0, target=0),

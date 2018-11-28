@@ -129,19 +129,15 @@ class Instruction(Packet):
 
 
 def AddI(dst=0, src=0, imm=0, **kwargs):
-    return Instruction(funct7=(imm >> 5), part1=((1 << 5 - 1) & imm), part2=src, funct3=0b000, part3=dst, opcode=0b0010011, **kwargs)
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b000, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Add(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def SubI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000001, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
-
-
-# def Sub(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b100001, dst=dst, src=src, target=target, **kwargs)
+def Sub(dst=0, src=0, target=0, **kwargs):
+    return Instruction(funct7=0b0100000, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
 
 # def MulI(dst=0, src=0, imm=0, **kwargs):
@@ -184,28 +180,28 @@ def Add(dst=0, src=0, target=0, **kwargs):
 #     return Instruction(opcode=0b100111, dst=dst, src=src, target=target, **kwargs)
 
 
-# def AndI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b001000, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
+def AndI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b111, part3=dst, opcode=0b0010011, **kwargs)
 
 
-# def And(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101000, dst=dst, src=src, target=target, **kwargs)
+def And(dst=0, src=0, target=0, **kwargs):
+    return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b111, part3=dst, opcode=0b0110011, **kwargs)
 
 
 # def OrI(dst=0, src=0, imm=0, **kwargs):
 #     return Instruction(opcode=0b001001, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
-# def Or(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101001, dst=dst, src=src, target=target, **kwargs)
+def Or(dst=0, src=0, target=0, **kwargs):
+    return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b110, part3=dst, opcode=0b0110011, **kwargs)
 
 
 # def XorI(dst=0, src=0, imm=0, **kwargs):
 #     return Instruction(opcode=0b001010, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
 
 
-# def Xor(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101010, dst=dst, src=src, target=target, **kwargs)
+def Xor(dst=0, src=0, target=0, **kwargs):
+    return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b100, part3=dst, opcode=0b0110011, **kwargs)
 
 
 # def MovI(dst=0, src=0, imm=0, **kwargs):
