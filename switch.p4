@@ -502,7 +502,7 @@ control MyIngress(inout headers hdr,
             insn_opcode_exact.apply();
             hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
             // Forward to self if execution is not complete
-            if (hdr.program_execution_metadata.pc < meta.program_length
+            if ((hdr.program_execution_metadata.pc >> 2) < meta.program_length
               && hdr.program_execution_metadata.steps < hdr.program_metadata.max_steps) {
                 standard_metadata.egress_spec = standard_metadata.ingress_port;
                 recirculate({meta, standard_metadata});
