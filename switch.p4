@@ -239,6 +239,38 @@ control MyIngress(inout headers hdr,
         utype.opcode = unknown.opcode;
     }
 
+    action bless_i_imm(in insn_itype_t itype, out bit<32> imm) {
+        imm = (bit<32>) itype.imm;
+        if ((imm & 0x00000800) > 0) {
+            imm = imm | 0xfffff000;
+        }
+    }
+
+    action bless_s_imm(in insn_stype_t stype, out bit<32> imm) {
+        imm = (bit<32>) (stype.imm_upper ++ stype.imm_lower);
+        if ((imm & 0x00000800) > 0) {
+            imm = imm | 0xfffff000;
+        }
+    }
+
+    action bless_b_imm(in insn_stype_t stype, out bit<32> imm) {
+        imm = (bit<32>) (stype.imm_upper[6:6] ++ stype.imm_lower[0:0] ++ stype.imm_upper[5:0] ++ stype.imm_lower[4:1] ++ 1w0);
+        if ((imm & 0x00001000) > 0) {
+            imm = imm | 0xffffe000;
+        }
+    }
+
+    action bless_u_imm(in insn_itype_t itype, out bit<32> imm) {
+        imm = itype.imm ++ itype.rs1 ++ itype.funct3 ++ 12w0;
+    }
+
+    action bless_j_imm(in insn_utype_t utype, out bit<32> imm) {
+        imm = (bit<32>) (imm[19:19] ++ imm[7:0] ++ imm[8:8] ++ imm[18:9] ++ 1w0);
+        if ((imm & 0x00100000) > 0) {
+            imm = imm | 0xffe00000;
+        }
+    }
+
     action handle_rtype() {
         exit;
     }
@@ -346,8 +378,10 @@ control MyIngress(inout headers hdr,
         insn_itype_t addi;
         bless_itype(meta.current_insn, addi);
         bit<32> r1;
+        bit<32> imm;
         get_register(addi.rs1, r1);
-        set_register(addi.rd, r1 + (bit<32>) addi.imm);
+        bless_i_imm(addi, imm);
+        set_register(addi.rd, r1 + imm);
         advance_pc();
     }
 
