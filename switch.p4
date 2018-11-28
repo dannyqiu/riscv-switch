@@ -535,6 +535,10 @@ control MyIngress(inout headers hdr,
             else {
                 // Forward to data store host
                 standard_metadata.egress_spec = DATASTORE_HOST_PORT;
+                hdr.ethernet.srcAddr = hdr.program_execution_metadata.src_mac;
+                hdr.ethernet.dstAddr = DATASTORE_MAC;
+                hdr.ipv4.srcAddr = hdr.program_execution_metadata.src_ipv4;
+                hdr.ipv4.dstAddr = DATASTORE_IP;
             }
         }
         else if (hdr.ipv4.isValid()) {
