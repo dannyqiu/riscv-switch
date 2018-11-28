@@ -208,6 +208,7 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_rtype(in insn_unknown_t unknown, out insn_rtype_t rtype) {
+        rtype.setValid();
         rtype.funct7 = unknown.funct7;
         rtype.rs2 = unknown.part1;
         rtype.rs1 = unknown.part2;
@@ -217,6 +218,7 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_itype(in insn_unknown_t unknown, out insn_itype_t itype) {
+        itype.setValid();
         itype.imm = unknown.funct7 ++ unknown.part1;
         itype.rs1 = unknown.part2;
         itype.funct3 = unknown.funct3;
@@ -225,6 +227,7 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_stype(in insn_unknown_t unknown, out insn_stype_t stype) {
+        stype.setValid();
         stype.imm_upper = unknown.funct7;
         stype.rs2 = unknown.part1;
         stype.rs1 = unknown.part2;
@@ -234,27 +237,28 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_utype(in insn_unknown_t unknown, out insn_utype_t utype) {
+        utype.setValid();
         utype.imm = unknown.funct7 ++ unknown.part1 ++ unknown.part2 ++ unknown.funct3;
         utype.rd = unknown.part3;
         utype.opcode = unknown.opcode;
     }
 
     action bless_i_imm(in insn_itype_t itype, out bit<32> imm) {
-        imm = (bit<32>) itype.imm;
+        imm = 20w0 ++ itype.imm;
         if ((imm & 0x00000800) > 0) {
             imm = imm | 0xfffff000;
         }
     }
 
     action bless_s_imm(in insn_stype_t stype, out bit<32> imm) {
-        imm = (bit<32>) (stype.imm_upper ++ stype.imm_lower);
+        imm = 20w0 ++ (stype.imm_upper ++ stype.imm_lower);
         if ((imm & 0x00000800) > 0) {
             imm = imm | 0xfffff000;
         }
     }
 
     action bless_b_imm(in insn_stype_t stype, out bit<32> imm) {
-        imm = (bit<32>) (stype.imm_upper[6:6] ++ stype.imm_lower[0:0] ++ stype.imm_upper[5:0] ++ stype.imm_lower[4:1] ++ 1w0);
+        imm = 19w0 ++ stype.imm_upper[6:6] ++ stype.imm_lower[0:0] ++ stype.imm_upper[5:0] ++ stype.imm_lower[4:1] ++ 1w0;
         if ((imm & 0x00001000) > 0) {
             imm = imm | 0xffffe000;
         }
@@ -265,7 +269,7 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_j_imm(in insn_utype_t utype, out bit<32> imm) {
-        imm = (bit<32>) (imm[19:19] ++ imm[7:0] ++ imm[8:8] ++ imm[18:9] ++ 1w0);
+        imm = 11w0 ++ imm[19:19] ++ imm[7:0] ++ imm[8:8] ++ imm[18:9] ++ 1w0;
         if ((imm & 0x00100000) > 0) {
             imm = imm | 0xffe00000;
         }
