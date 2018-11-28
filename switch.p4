@@ -26,20 +26,24 @@ parser ProgramParser(packet_in packet,
     bit<32> insns_to_current;
 
     state start {
-        packet.extract(hdr.program_metadata);
+        insns_to_current = 0;
         meta.program_length = 0;
         registers_to_parse = NUM_REGISTERS;
-        insns_to_current = 0;
         transition select(hdr.ipv4.protocol) {
-            PROTO_RAW_PROGRAM: parse_registers;
+            PROTO_RAW_PROGRAM: parse_metadata;
             PROTO_PROGRAM: parse_execution_metadata;
         }
+    }
+
+    state parse_metadata {
+        packet.extract(hdr.program_metadata);
+        transition parse_registers;
     }
 
     state parse_execution_metadata {
         packet.extract(hdr.program_execution_metadata);
         insns_to_current = hdr.program_execution_metadata.pc;
-        transition parse_registers;
+        transition parse_metadata;
     }
 
     state parse_registers {
@@ -504,8 +508,8 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
-        packet.emit(hdr.program_metadata);
         packet.emit(hdr.program_execution_metadata);
+        packet.emit(hdr.program_metadata);
         packet.emit(hdr.registers);
         packet.emit(hdr.insns);
         packet.emit(hdr.end_program);

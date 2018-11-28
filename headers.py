@@ -6,6 +6,11 @@ from scapy.fields import *
 
 
 PROTO_RAW_PROGRAM = 0x8F
+PROTO_PROGRAM = 0x90
+PROTO_STORE_REQUEST = 0x91
+PROTO_LOAD_REQUEST = 0x92
+PROTO_LOAD_RESPONSE = 0x93
+
 MAX_PROGRAM_LENGTH = 300
 
 LOAD_BALANCER_IP = '10.255.255.0'
@@ -22,10 +27,49 @@ def get_if():
     return iface[0]
 
 
-class ProtoWrapper(Packet):
-    name = 'ProtoWrapper'
+class ProgramMetadata(Packet):
+    name = 'ProgramMetadata'
     fields_desc = [
         BitField('max_steps', 0, 32),
+    ]
+
+
+class ProgramExecutionMetadata(Packet):
+    name = 'ProgramExecutionMetadata'
+    fields_desc = [
+        BitField('src_port', 0, 9),
+        BitField('reserved', 0, 3),
+        BitField('src_mac', 0, 48),
+        BitField('src_ipv4', 0, 32),
+        BitField('pc', 0, 32),
+        BitField('steps', 0, 32),
+        BitField('mem_namespace', 0, 32),
+    ]
+
+
+class StoreRequestMetadata(Packet):
+    name = 'StoreRequestMetadata'
+    fields_desc = [
+        BitField('address', 0, 32),
+        BitField('value', 0, 32),
+    ]
+
+
+class LoadRequestMetadata(Packet):
+    name = 'LoadRequestMetadata'
+    fields_desc = [
+        BitField('address', 0, 32),
+        BitField('register', 0, 5),
+        BitField('reserved', 0, 3),
+    ]
+
+
+class LoadResponseMetadata(Packet):
+    name = 'LoadResponseMetadata'
+    fields_desc = [
+        BitField('value', 0, 32),
+        BitField('register', 0, 5),
+        BitField('reserved', 0, 3),
     ]
 
 
@@ -216,7 +260,7 @@ def EndOfProgram(**kwargs):
 
 
 def make_program(pkt, insns):
-    pkt /= ProtoWrapper(max_steps=1000)
+    pkt /= ProgramMetadata(max_steps=1000)
     pkt /= Registers()
     assert len(insns) < MAX_PROGRAM_LENGTH
     for insn in insns:
@@ -225,7 +269,15 @@ def make_program(pkt, insns):
     return pkt
 
 
-bind_layers(IP, ProtoWrapper)
-bind_layers(ProtoWrapper, Registers)
+bind_layers(IP, ProgramMetadata, proto=PROTO_RAW_PROGRAM)
+bind_layers(IP, ProgramExecutionMetadata, proto=PROTO_PROGRAM)
+bind_layers(IP, StoreRequestMetadata, proto=PROTO_STORE_REQUEST)
+bind_layers(IP, LoadRequestMetadata, proto=PROTO_LOAD_REQUEST)
+bind_layers(IP, LoadResponseMetadata, proto=PROTO_LOAD_RESPONSE)
+bind_layers(StoreRequestMetadata, ProgramExecutionMetadata)
+bind_layers(LoadRequestMetadata, ProgramExecutionMetadata)
+bind_layers(LoadResponseMetadata, ProgramExecutionMetadata)
+bind_layers(ProgramExecutionMetadata, ProgramMetadata)
+bind_layers(ProgramMetadata, Registers)
 bind_layers(Registers, Instruction)
 bind_layers(Instruction, Instruction)

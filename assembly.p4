@@ -1,5 +1,8 @@
 const bit<8>  PROTO_RAW_PROGRAM = 0x8F;
 const bit<8>  PROTO_PROGRAM = 0x90;
+const bit<8>  PROTO_STORE_REQUEST = 0x91;
+const bit<8>  PROTO_LOAD_REQUEST = 0x92;
+const bit<8>  PROTO_LOAD_RESPONSE = 0x93;
 
 const bit<32> NUM_REGISTERS = 32;
 const bit<32> MAX_INSNS = 300;
@@ -37,6 +40,25 @@ header program_execution_metadata_t {
     bit<32>   pc;
     bit<32>   steps;
     bit<32>   mem_namespace;
+}
+
+header store_request_metadata_t {
+    bit<32> address;
+    bit<32> value;
+}
+
+header load_request_metadata_t {
+    bit<32> address;
+    bit<5> register;
+    // Padding to make header word-aligned
+    bit<3> reserved;
+}
+
+header load_response_metadata_t {
+    bit<32> value;
+    bit<5> register;
+    // Padding to make header word-aligned
+    bit<3> reserved;
 }
 
 /*******************************************************************************
