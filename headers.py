@@ -140,10 +140,6 @@ def Sub(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0100000, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def MulI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000010, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
-
-
 def Mul(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000001, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
@@ -194,22 +190,6 @@ def XorI(dst=0, src=0, imm=0, **kwargs):
 
 def Xor(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b100, part3=dst, opcode=0b0110011, **kwargs)
-
-
-# def MovI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b001100, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
-
-
-# def Mov(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101100, dst=dst, src=src, target=target, **kwargs)
-
-
-# def Movz(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101101, dst=dst, src=src, target=target, **kwargs)
-
-
-# def Movn(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b101110, dst=dst, src=src, target=target, **kwargs)
 
 
 def Lui(dst=0, imm=0, **kwargs):
@@ -301,6 +281,10 @@ def Bgeu(src=0, target=0, imm=0, **kwargs):
                         part1=target, part2=src, funct3=0b111,
                         part3=((((imm >> 1) << 1) & ((1 << 5) - 1)) | ((imm >> 11) & ((1 << 1) - 1))),
                         opcode=0b1100011, **kwargs)
+
+
+def Nop(**kwargs):
+    return AddI(dst=0, src=0, imm=0, **kwargs)
 
 
 def EndOfProgram(**kwargs):

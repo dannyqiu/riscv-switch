@@ -64,6 +64,7 @@ def main():
         Bgeu(src=3, target=2, imm=8),
         AddI(dst=29, src=0, imm=0),      # skipped by previous Bgeu
         AddI(dst=29, src=29, imm=13),    # r29 = 133 (Bgeu success)
+        Nop(),
     ])
     hexdump(pkt)
     pkt.show2()
