@@ -85,12 +85,12 @@ parser ProgramParser(packet_in packet,
     // with non-constant values in the other stages
     state set_current_insn {
         meta.current_insn.setValid();
-        meta.current_insn.funct7 = packet.lookahead<bit<32>>()[31:25];
-        meta.current_insn.part1 = packet.lookahead<bit<32>>()[24:20];
-        meta.current_insn.part2 = packet.lookahead<bit<32>>()[19:15];
-        meta.current_insn.funct3 = packet.lookahead<bit<32>>()[14:12];
-        meta.current_insn.part3 = packet.lookahead<bit<32>>()[11:7];
-        meta.current_insn.opcode = packet.lookahead<bit<32>>()[6:0];
+        meta.current_insn.funct7 = packet.lookahead<insn_unknown_t>().funct7;
+        meta.current_insn.part1 = packet.lookahead<insn_unknown_t>().part1;
+        meta.current_insn.part2 = packet.lookahead<insn_unknown_t>().part2;
+        meta.current_insn.funct3 = packet.lookahead<insn_unknown_t>().funct3;
+        meta.current_insn.part3 = packet.lookahead<insn_unknown_t>().part3;
+        meta.current_insn.opcode = packet.lookahead<insn_unknown_t>().opcode;
         transition parse_insn;
     }
 
