@@ -17,12 +17,10 @@ parser ProgramParser(packet_in packet,
                      inout metadata meta,
                      inout standard_metadata_t standard_metadata) {
 
-    bit<32> registers_to_parse;
     bit<32> insns_to_current;
 
     state start {
         insns_to_current = 0;
-        registers_to_parse = NUM_REGISTERS;
         transition select(hdr.ipv4.protocol) {
             PROTO_RAW_PROGRAM: parse_metadata;
             PROTO_PROGRAM: parse_execution_metadata;
@@ -59,12 +57,40 @@ parser ProgramParser(packet_in packet,
     }
 
     state parse_registers {
-        registers_to_parse = registers_to_parse - 1;
+        // Extract values for the 32 registers
         packet.extract(hdr.registers.next);
-        transition select(registers_to_parse) {
-            0: parse_insns;
-            default: parse_registers;
-        }
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        packet.extract(hdr.registers.next);
+        transition parse_insns;
     }
 
     state parse_insns {
