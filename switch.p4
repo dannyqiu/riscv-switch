@@ -3,11 +3,6 @@
 #include <v1model.p4>
 #include "headers.p4"
 
-#define GET_REG_PRIMARY(r, n, v) if (r == n) { v = hdr.registers[n].value; }
-#define GET_REG_OTHERWISE(r, n, v) else if (r == n) { v = hdr.registers[n].value; }
-#define SET_REG_PRIMARY(r, n, v) if (r == n) { hdr.registers[n].value = v; }
-#define SET_REG_OTHERWISE(r, n, v) else if (r == n) { hdr.registers[n].value = v; }
-
 // Role IDs
 #define ROLE_LOAD_BALANCER 0
 #define ROLE_EXECUTION_UNIT 1
