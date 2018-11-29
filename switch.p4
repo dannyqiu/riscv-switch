@@ -452,6 +452,96 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_beq() {
+        insn_stype_t beq;
+        bless_stype(meta.current_insn, beq);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(beq.rs1, r1);
+        get_register(beq.rs2, r2);
+        bless_b_imm(beq, imm);
+        hdr.program_execution_metadata.pc =
+            (r1 == r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
+    action insn_bge() {
+        insn_stype_t bge;
+        bless_stype(meta.current_insn, bge);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(bge.rs1, r1);
+        get_register(bge.rs2, r2);
+        bless_b_imm(bge, imm);
+        hdr.program_execution_metadata.pc =
+            ((int<32>) r1 >= (int<32>) r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
+    action insn_bgeu() {
+        insn_stype_t bgeu;
+        bless_stype(meta.current_insn, bgeu);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(bgeu.rs1, r1);
+        get_register(bgeu.rs2, r2);
+        bless_b_imm(bgeu, imm);
+        hdr.program_execution_metadata.pc =
+            (r1 >= r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
+    action insn_blt() {
+        insn_stype_t blt;
+        bless_stype(meta.current_insn, blt);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(blt.rs1, r1);
+        get_register(blt.rs2, r2);
+        bless_b_imm(blt, imm);
+        hdr.program_execution_metadata.pc =
+            ((int<32>) r1 < (int<32>) r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
+    action insn_bltu() {
+        insn_stype_t bltu;
+        bless_stype(meta.current_insn, bltu);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(bltu.rs1, r1);
+        get_register(bltu.rs2, r2);
+        bless_b_imm(bltu, imm);
+        hdr.program_execution_metadata.pc =
+            (r1 < r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
+    action insn_bne() {
+        insn_stype_t bne;
+        bless_stype(meta.current_insn, bne);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(bne.rs1, r1);
+        get_register(bne.rs2, r2);
+        bless_b_imm(bne, imm);
+        hdr.program_execution_metadata.pc =
+            (r1 != r2)
+            ? hdr.program_execution_metadata.pc + imm
+            : hdr.program_execution_metadata.pc + 4;
+    }
+
     action insn_jal() {
         insn_utype_t jal;
         bless_utype(meta.current_insn, jal);
@@ -706,6 +796,12 @@ control MyIngress(inout headers hdr,
             insn_and;
             insn_andi;
             insn_auipc;
+            insn_beq;
+            insn_bge;
+            insn_bgeu;
+            insn_blt;
+            insn_bltu;
+            insn_bne;
             insn_jal;
             insn_jalr;
             insn_lui;
@@ -761,8 +857,12 @@ control MyIngress(inout headers hdr,
             (_, _, 0b1101111) : insn_jal();
             (_, 0b000, 0b1100111) : insn_jalr();
 
-            // (_, _, 0b0100011) : handle_stype(); // SW
-            // (_, _, 0b1100011) : handle_stype(); // generic branch
+            (_, 0b000, 0b1100011) : insn_beq();
+            (_, 0b001, 0b1100011) : insn_bne();
+            (_, 0b100, 0b1100011) : insn_blt();
+            (_, 0b101, 0b1100011) : insn_bge();
+            (_, 0b110, 0b1100011) : insn_bltu();
+            (_, 0b111, 0b1100011) : insn_bgeu();
         }
     }
 

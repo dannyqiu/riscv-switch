@@ -45,6 +45,25 @@ def main():
         Jalr(dst=27, src=26, imm=4),     # r27 = 112
         Sw(dst=9, src=15, imm=4),        # mem[12] = 1302
         Lw(dst=28, src=9, imm=4),        # r28 = mem[12] = 1302
+        AddI(dst=29, src=1, imm=50),     # r29 = 92
+        Beq(src=13, target=13, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Beq
+        AddI(dst=29, src=29, imm=2),     # r29 = 94 (Beq success)
+        Bne(src=13, target=14, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Bne
+        AddI(dst=29, src=29, imm=3),     # r29 = 97 (Bne success)
+        Blt(src=3, target=2, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Blt
+        AddI(dst=29, src=29, imm=5),     # r29 = 102 (Blt success)
+        Bge(src=2, target=3, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Bge
+        AddI(dst=29, src=29, imm=7),     # r29 = 109 (Bge success)
+        Bltu(src=2, target=3, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Bltu
+        AddI(dst=29, src=29, imm=11),    # r29 = 120 (Bltu success)
+        Bgeu(src=3, target=2, imm=8),
+        AddI(dst=29, src=0, imm=0),      # skipped by previous Bgeu
+        AddI(dst=29, src=29, imm=13),    # r29 = 133 (Bgeu success)
     ])
     hexdump(pkt)
     pkt.show2()
