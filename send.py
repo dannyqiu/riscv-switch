@@ -65,6 +65,9 @@ def main():
         AddI(dst=29, src=0, imm=0),      # skipped by previous Bgeu
         AddI(dst=29, src=29, imm=13),    # r29 = 133 (Bgeu success)
         Nop(),
+        Lw(dst=30, src=1, imm=2),        # r30 = # of times this program has been run
+        AddI(dst=30, src=30, imm=1),
+        Sw(dst=1, src=30, imm=2),
     ])
     hexdump(pkt)
     pkt.show2()
