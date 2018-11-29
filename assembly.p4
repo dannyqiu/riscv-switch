@@ -74,6 +74,10 @@ header load_response_metadata_t {
 *********************** A S S E M B L Y ****************************************
 *******************************************************************************/
 
+header insn_unparsed_t {
+    bit<32> encoded;
+}
+
 header insn_unknown_t {
     bit<7>  funct7;
     bit<5>  part1;
