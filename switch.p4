@@ -422,6 +422,17 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_mul() {
+        insn_rtype_t mul;
+        bless_rtype(meta.current_insn, mul);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(mul.rs1, r1);
+        get_register(mul.rs2, r2);
+        set_register(mul.rd, r1 * r2);
+        advance_pc();
+    }
+
     action insn_or() {
         insn_rtype_t or;
         bless_rtype(meta.current_insn, or);
@@ -430,6 +441,61 @@ control MyIngress(inout headers hdr,
         get_register(or.rs1, r1);
         get_register(or.rs2, r2);
         set_register(or.rd, r1 | r2);
+        advance_pc();
+    }
+
+    action insn_sll() {
+        insn_rtype_t sll;
+        bless_rtype(meta.current_insn, sll);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(sll.rs1, r1);
+        get_register(sll.rs2, r2);
+        set_register(sll.rd, r1 << r2[4:0]);
+        advance_pc();
+    }
+
+    action insn_slt() {
+        insn_rtype_t slt;
+        bless_rtype(meta.current_insn, slt);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(slt.rs1, r1);
+        get_register(slt.rs2, r2);
+        set_register(slt.rd, ((int<32>) r1 < (int<32>) r2) ? 32w1 : 32w0);
+        advance_pc();
+    }
+
+    action insn_sltu() {
+        insn_rtype_t slt;
+        bless_rtype(meta.current_insn, slt);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(slt.rs1, r1);
+        get_register(slt.rs2, r2);
+        set_register(slt.rd, (r1 < r2) ? 32w1 : 32w0);
+        advance_pc();
+    }
+
+    action insn_sra() {
+        insn_rtype_t sra;
+        bless_rtype(meta.current_insn, sra);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(sra.rs1, r1);
+        get_register(sra.rs2, r2);
+        set_register(sra.rd, (bit<32>) ((int<32>) r1 >> r2[4:0]));
+        advance_pc();
+    }
+
+    action insn_srl() {
+        insn_rtype_t srl;
+        bless_rtype(meta.current_insn, srl);
+        bit<32> r1;
+        bit<32> r2;
+        get_register(srl.rs1, r1);
+        get_register(srl.rs2, r2);
+        set_register(srl.rd, r1 >> r2[4:0]);
         advance_pc();
     }
 
@@ -466,7 +532,13 @@ control MyIngress(inout headers hdr,
             insn_addi;
             insn_and;
             insn_andi;
+            insn_mul;
             insn_or;
+            insn_sll;
+            insn_slt;
+            insn_sltu;
+            insn_sra;
+            insn_srl;
             insn_sub;
             insn_xor;
             advance_pc;
@@ -478,12 +550,12 @@ control MyIngress(inout headers hdr,
             (0b0000000, 0b111, 0b0110011) : insn_and();
             (0b0000000, 0b110, 0b0110011) : insn_or();
             (0b0000000, 0b100, 0b0110011) : insn_xor();
-            // (0b0000000, 0b010, 0b0110011) : insn_slt();
-            // (0b0000000, 0b011, 0b0110011) : insn_sltu();
-            // (0b0100000, 0b101, 0b0110011) : insn_sra();
-            // (0b0000000, 0b101, 0b0110011) : insn_srl();
-            // (0b0000000, 0b001, 0b0110011) : insn_sll();
-            // (0b0000001, 0b000, 0b0110011) : insn_mul();
+            (0b0000000, 0b010, 0b0110011) : insn_slt();
+            (0b0000000, 0b011, 0b0110011) : insn_sltu();
+            (0b0100000, 0b101, 0b0110011) : insn_sra();
+            (0b0000000, 0b101, 0b0110011) : insn_srl();
+            (0b0000000, 0b001, 0b0110011) : insn_sll();
+            (0b0000001, 0b000, 0b0110011) : insn_mul();
 
             // (_, _, 0b0110011) : handle_rtype(); // generic rtype
 
