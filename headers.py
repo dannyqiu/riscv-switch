@@ -148,24 +148,24 @@ def Mul(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000001, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def SllI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000100, dst=dst, src=src, target=imm, **kwargs)
+def SllI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=0b0000000, part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b001, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Sll(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b001, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def SrlI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000110, dst=dst, src=src, target=imm, **kwargs)
+def SrlI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=0b0000000, part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b101, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Srl(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b101, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def SraI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000111, dst=dst, src=src, target=imm, **kwargs)
+def SraI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=0b0100000, part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b101, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Sra(dst=0, src=0, target=0, **kwargs):
@@ -180,16 +180,16 @@ def And(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b111, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def OrI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b001001, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
+def OrI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b110, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Or(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b110, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def XorI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b001010, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
+def XorI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b100, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Xor(dst=0, src=0, target=0, **kwargs):
@@ -212,8 +212,16 @@ def Xor(dst=0, src=0, target=0, **kwargs):
 #     return Instruction(opcode=0b101110, dst=dst, src=src, target=target, **kwargs)
 
 
+def SltI(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b010, part3=dst, opcode=0b0010011, **kwargs)
+
+
 def Slt(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b010, part3=dst, opcode=0b0110011, **kwargs)
+
+
+def SltIu(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b011, part3=dst, opcode=0b0010011, **kwargs)
 
 
 def Sltu(dst=0, src=0, target=0, **kwargs):

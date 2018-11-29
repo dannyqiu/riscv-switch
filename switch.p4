@@ -439,6 +439,17 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_ori() {
+        insn_itype_t ori;
+        bless_itype(meta.current_insn, ori);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(ori.rs1, r1);
+        bless_i_imm(ori, imm);
+        set_register(ori.rd, r1 | imm);
+        advance_pc();
+    }
+
     action insn_sll() {
         insn_rtype_t sll;
         bless_rtype(meta.current_insn, sll);
@@ -450,6 +461,17 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_slli() {
+        insn_itype_t slli;
+        bless_itype(meta.current_insn, slli);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(slli.rs1, r1);
+        bless_i_imm(slli, imm);
+        set_register(slli.rd, r1 << imm[4:0]);
+        advance_pc();
+    }
+
     action insn_slt() {
         insn_rtype_t slt;
         bless_rtype(meta.current_insn, slt);
@@ -458,6 +480,28 @@ control MyIngress(inout headers hdr,
         get_register(slt.rs1, r1);
         get_register(slt.rs2, r2);
         set_register(slt.rd, ((int<32>) r1 < (int<32>) r2) ? 32w1 : 32w0);
+        advance_pc();
+    }
+
+    action insn_slti() {
+        insn_itype_t slti;
+        bless_itype(meta.current_insn, slti);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(slti.rs1, r1);
+        bless_i_imm(slti, imm);
+        set_register(slti.rd, ((int<32>) r1 < (int<32>) imm) ? 32w1 : 32w0);
+        advance_pc();
+    }
+
+    action insn_sltiu() {
+        insn_itype_t sltiu;
+        bless_itype(meta.current_insn, sltiu);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(sltiu.rs1, r1);
+        bless_i_imm(sltiu, imm);
+        set_register(sltiu.rd, (r1 < imm) ? 32w1 : 32w0);
         advance_pc();
     }
 
@@ -483,6 +527,17 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_srai() {
+        insn_itype_t srai;
+        bless_itype(meta.current_insn, srai);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(srai.rs1, r1);
+        bless_i_imm(srai, imm);
+        set_register(srai.rd, (bit<32>) ((int<32>) r1 >> imm[4:0]));
+        advance_pc();
+    }
+
     action insn_srl() {
         insn_rtype_t srl;
         bless_rtype(meta.current_insn, srl);
@@ -491,6 +546,17 @@ control MyIngress(inout headers hdr,
         get_register(srl.rs1, r1);
         get_register(srl.rs2, r2);
         set_register(srl.rd, r1 >> r2[4:0]);
+        advance_pc();
+    }
+
+    action insn_srli() {
+        insn_itype_t srli;
+        bless_itype(meta.current_insn, srli);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(srli.rs1, r1);
+        bless_i_imm(srli, imm);
+        set_register(srli.rd, r1 >> imm[4:0]);
         advance_pc();
     }
 
@@ -516,6 +582,17 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_xori() {
+        insn_itype_t xori;
+        bless_itype(meta.current_insn, xori);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(xori.rs1, r1);
+        bless_i_imm(xori, imm);
+        set_register(xori.rd, r1 ^ imm);
+        advance_pc();
+    }
+
     table insn_opcode {
         key = {
             meta.current_insn.funct7: ternary;
@@ -529,13 +606,20 @@ control MyIngress(inout headers hdr,
             insn_andi;
             insn_mul;
             insn_or;
+            insn_ori;
             insn_sll;
+            insn_slli;
             insn_slt;
+            insn_slti;
+            insn_sltiu;
             insn_sltu;
             insn_sra;
+            insn_srai;
             insn_srl;
+            insn_srli;
             insn_sub;
             insn_xor;
+            insn_xori;
             advance_pc;
         }
         default_action = advance_pc();
@@ -556,6 +640,13 @@ control MyIngress(inout headers hdr,
 
             (_, 0b000, 0b0010011) : insn_addi();
             (_, 0b111, 0b0010011) : insn_andi();
+            (_, 0b110, 0b0010011) : insn_ori();
+            (_, 0b100, 0b0010011) : insn_xori();
+            (_, 0b010, 0b0010011) : insn_slti();
+            (_, 0b011, 0b0010011) : insn_sltiu();
+            (0b0100000, 0b101, 0b0010011) : insn_srai();
+            (0b0000000, 0b101, 0b0010011) : insn_srli();
+            (0b0000000, 0b001, 0b0010011) : insn_slli();
 
             // (_, _, 0b0000011) : handle_itype(); // LW
             // (_, _, 0b1100111) : handle_itype(); // JR / JALR

@@ -32,6 +32,13 @@ def main():
         Srl(dst=13, src=3, target=1),    # r13 = 4194303
         Sll(dst=14, src=1, target=1),    # r14 = 43008
         Mul(dst=15, src=1, target=2),    # r15 = 1302
+        OrI(dst=16, src=1, imm=31),      # r16 = 63
+        XorI(dst=17, src=1, imm=31),     # r17 = 53
+        SltI(dst=18, src=3, imm=100),    # r18 = 1
+        SltIu(dst=19, src=2, imm=-100),  # r19 = 1
+        SraI(dst=20, src=3, imm=10),     # r20 = -1 (4294967295)
+        SrlI(dst=21, src=3, imm=14),     # r21 = 262143
+        SllI(dst=22, src=1, imm=5),      # r22 = 1344
     ])
     hexdump(pkt)
     pkt.show2()
