@@ -212,6 +212,14 @@ def Xor(dst=0, src=0, target=0, **kwargs):
 #     return Instruction(opcode=0b101110, dst=dst, src=src, target=target, **kwargs)
 
 
+def Lui(dst=0, imm=0, **kwargs):
+    return Instruction(funct7=imm >> 13, part1=(((1 << 5) - 1) & (imm >> 8)), part2=(((1 << 5) - 1) & (imm >> 3)), funct3=(((1 << 3) - 1) & imm), part3=dst, opcode=0b0110111, **kwargs)
+
+
+def Auipc(dst=0, imm=0, **kwargs):
+    return Instruction(funct7=imm >> 13, part1=(((1 << 5) - 1) & (imm >> 8)), part2=(((1 << 5) - 1) & (imm >> 3)), funct3=(((1 << 3) - 1) & imm), part3=dst, opcode=0b0010111, **kwargs)
+
+
 def SltI(dst=0, src=0, imm=0, **kwargs):
     return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b010, part3=dst, opcode=0b0010011, **kwargs)
 

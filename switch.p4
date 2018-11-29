@@ -417,6 +417,28 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_auipc() {
+        insn_itype_t auipc;
+        bless_itype(meta.current_insn, auipc);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(auipc.rs1, r1);
+        bless_u_imm(auipc, imm);
+        set_register(auipc.rd, hdr.program_execution_metadata.pc + imm);
+        advance_pc();
+    }
+
+    action insn_lui() {
+        insn_itype_t lui;
+        bless_itype(meta.current_insn, lui);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(lui.rs1, r1);
+        bless_u_imm(lui, imm);
+        set_register(lui.rd, imm);
+        advance_pc();
+    }
+
     action insn_mul() {
         insn_rtype_t mul;
         bless_rtype(meta.current_insn, mul);
@@ -604,6 +626,8 @@ control MyIngress(inout headers hdr,
             insn_addi;
             insn_and;
             insn_andi;
+            insn_auipc;
+            insn_lui;
             insn_mul;
             insn_or;
             insn_ori;
@@ -647,16 +671,15 @@ control MyIngress(inout headers hdr,
             (0b0100000, 0b101, 0b0010011) : insn_srai();
             (0b0000000, 0b101, 0b0010011) : insn_srli();
             (0b0000000, 0b001, 0b0010011) : insn_slli();
+            (_, _, 0b0110111) : insn_lui();
+            (_, _, 0b0010111) : insn_auipc();
 
             // (_, _, 0b0000011) : handle_itype(); // LW
             // (_, _, 0b1100111) : handle_itype(); // JR / JALR
-            // (_, _, 0b0010011) : handle_itype(); // generic itype
 
             // (_, _, 0b0100011) : handle_stype(); // SW
             // (_, _, 0b1100011) : handle_stype(); // generic branch
 
-            // (_, _, 0b0010111) : handle_utype(); // AUIPC
-            // (_, _, 0b0110111) : handle_utype(); // LUI
             // (_, _, 0b1101111) : handle_utype(); // JAL
         }
     }

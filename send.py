@@ -39,6 +39,8 @@ def main():
         SraI(dst=20, src=3, imm=10),     # r20 = -1 (4294967295)
         SrlI(dst=21, src=3, imm=14),     # r21 = 262143
         SllI(dst=22, src=1, imm=5),      # r22 = 1344
+        Lui(dst=23, imm=0xabcde),        # r23 = 2882396160
+        Auipc(dst=24, imm=0xabcde),      # r23 = 2882396252
     ])
     hexdump(pkt)
     pkt.show2()
