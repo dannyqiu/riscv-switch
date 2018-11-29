@@ -231,6 +231,8 @@ class ExerciseRunner:
         self.program_hosts()
         self.program_switches()
 
+        self.autorun_datastore()
+
         # wait for that to finish. Not sure how to do this better
         sleep(1)
 
@@ -378,6 +380,13 @@ class ExerciseRunner:
 
         CLI(self.net)
 
+    def autorun_datastore(self):
+        for host_name in self.topo.hosts():
+            # Run datastore on datastore host
+            if host_name != 'h99':
+                continue
+            h = self.net.get(host_name)
+            h.cmd('./datastore.py > logs/datastore.log &')
 
 def get_args():
     cwd = os.getcwd()
