@@ -38,7 +38,11 @@ def main():
         SrlI(dst=21, src=3, imm=14),     # r21 = 262143
         SllI(dst=22, src=1, imm=5),      # r22 = 1344
         Lui(dst=23, imm=0xabcde),        # r23 = 2882396160
-        Auipc(dst=24, imm=0xabcde),      # r23 = 2882396252
+        Auipc(dst=24, imm=0xabcde),      # r24 = 2882396252
+        Jal(dst=25, imm=4),              # r25 = 100
+        AddI(dst=26, src=25, imm=8),     # r26 = 108 (want to point to pc after Jr)
+        Jr(src=26),
+        Jalr(dst=27, src=26, imm=4),     # r27 = 112
         Sw(dst=9, src=15, imm=0),        # mem[8] = 1302
     ])
     hexdump(pkt)

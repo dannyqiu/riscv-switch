@@ -244,6 +244,22 @@ def Sw(dst=0, src=0, imm=0, **kwargs):
 #     return Instruction(opcode=0b110001, dst=dst, src=src, target=target, **kwargs)
 
 
+def Jal(dst=0, imm=0, **kwargs):
+    return Instruction(funct7=(((imm >> 19) << 6) | ((imm >> 5) & ((1 << 6) - 1))),
+                        part1=((((imm >> 1) << 1) & ((1 << 5) - 1)) | ((imm >> 11) & ((1 << 1) - 1))),
+                        part2=((imm >> 15) & ((1 << 5) - 1)),
+                       funct3=((imm >> 12) & ((1 << 3) - 1)),
+                        part3=dst, opcode=0b1101111, **kwargs)
+
+
+def Jr(src=0, **kwargs):
+    return Jalr(dst=0, src=src, imm=0, **kwargs)
+
+
+def Jalr(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b000, part3=dst, opcode=0b1100111, **kwargs)
+
+
 # def Beq(src=0, target=0, imm=0, **kwargs):
 #     return Instruction(opcode=0b011000, src=src, target=target, imm=(0b11111111111 & imm), **kwargs)
 

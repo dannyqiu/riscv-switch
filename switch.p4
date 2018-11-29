@@ -301,7 +301,7 @@ control MyIngress(inout headers hdr,
     }
 
     action bless_j_imm(in insn_utype_t utype, out bit<32> imm) {
-        imm = 11w0 ++ imm[19:19] ++ imm[7:0] ++ imm[8:8] ++ imm[18:9] ++ 1w0;
+        imm = 11w0 ++ utype.imm[19:19] ++ utype.imm[7:0] ++ utype.imm[8:8] ++ utype.imm[18:9] ++ 1w0;
         if ((imm & 0x00100000) > 0) {
             imm = imm | 0xffe00000;
         }
@@ -455,6 +455,27 @@ control MyIngress(inout headers hdr,
         bless_u_imm(auipc, imm);
         set_register(auipc.rd, hdr.program_execution_metadata.pc + imm);
         advance_pc();
+    }
+
+    action insn_jal() {
+        insn_utype_t jal;
+        bless_utype(meta.current_insn, jal);
+        bit<32> imm;
+        bless_j_imm(jal, imm);
+        set_register(jal.rd, hdr.program_execution_metadata.pc + 4);
+        hdr.program_execution_metadata.pc = hdr.program_execution_metadata.pc + imm;
+    }
+
+    action insn_jalr() {
+        insn_itype_t jalr;
+        bless_itype(meta.current_insn, jalr);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(jalr.rs1, r1);
+        bless_i_imm(jalr, imm);
+        set_register(jalr.rd, hdr.program_execution_metadata.pc + 4);
+        // set the lsb to zero since RISC-V's smallest instruction encoding is 16 bits
+        hdr.program_execution_metadata.pc = (r1 + imm) & 0xfffffffe;
     }
 
     action insn_lui() {
@@ -674,6 +695,8 @@ control MyIngress(inout headers hdr,
             insn_and;
             insn_andi;
             insn_auipc;
+            insn_jal;
+            insn_jalr;
             insn_lui;
             insn_mul;
             insn_or;
@@ -708,8 +731,6 @@ control MyIngress(inout headers hdr,
             (0b0000000, 0b001, 0b0110011) : insn_sll();
             (0b0000001, 0b000, 0b0110011) : insn_mul();
 
-            // (_, _, 0b0110011) : handle_rtype(); // generic rtype
-
             (_, 0b000, 0b0010011) : insn_addi();
             (_, 0b111, 0b0010011) : insn_andi();
             (_, 0b110, 0b0010011) : insn_ori();
@@ -723,12 +744,12 @@ control MyIngress(inout headers hdr,
             (_, _, 0b0010111) : insn_auipc();
 
             (_, 0b010, 0b0100011) : insn_sw();
-            // (_, _, 0b1100111) : handle_itype(); // JR / JALR
+
+            (_, _, 0b1101111) : insn_jal();
+            (_, 0b000, 0b1100111) : insn_jalr();
 
             // (_, _, 0b0100011) : handle_stype(); // SW
             // (_, _, 0b1100011) : handle_stype(); // generic branch
-
-            // (_, _, 0b1101111) : handle_utype(); // JAL
         }
     }
 
