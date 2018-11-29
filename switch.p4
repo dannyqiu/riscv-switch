@@ -183,6 +183,8 @@ control MyIngress(inout headers hdr,
     bit<32> target_execution_node_idx = 0;
     bit<32> target_execution_node_id = 0;
 
+    register<bit<32>>(NUM_REGISTERS) registers;
+
     action drop() {
         mark_to_drop();
     }
@@ -276,75 +278,86 @@ control MyIngress(inout headers hdr,
     }
 
     action get_register(in bit<5> r, out bit<32> value) {
-        value = 0;
-        GET_REG_PRIMARY(r, 0, value)
-        GET_REG_OTHERWISE(r, 1, value)
-        GET_REG_OTHERWISE(r, 2, value)
-        GET_REG_OTHERWISE(r, 3, value)
-        GET_REG_OTHERWISE(r, 4, value)
-        GET_REG_OTHERWISE(r, 5, value)
-        GET_REG_OTHERWISE(r, 6, value)
-        GET_REG_OTHERWISE(r, 7, value)
-        GET_REG_OTHERWISE(r, 8, value)
-        GET_REG_OTHERWISE(r, 9, value)
-        GET_REG_OTHERWISE(r, 10, value)
-        GET_REG_OTHERWISE(r, 11, value)
-        GET_REG_OTHERWISE(r, 12, value)
-        GET_REG_OTHERWISE(r, 13, value)
-        GET_REG_OTHERWISE(r, 14, value)
-        GET_REG_OTHERWISE(r, 15, value)
-        GET_REG_OTHERWISE(r, 16, value)
-        GET_REG_OTHERWISE(r, 17, value)
-        GET_REG_OTHERWISE(r, 18, value)
-        GET_REG_OTHERWISE(r, 19, value)
-        GET_REG_OTHERWISE(r, 20, value)
-        GET_REG_OTHERWISE(r, 21, value)
-        GET_REG_OTHERWISE(r, 22, value)
-        GET_REG_OTHERWISE(r, 23, value)
-        GET_REG_OTHERWISE(r, 24, value)
-        GET_REG_OTHERWISE(r, 25, value)
-        GET_REG_OTHERWISE(r, 26, value)
-        GET_REG_OTHERWISE(r, 27, value)
-        GET_REG_OTHERWISE(r, 28, value)
-        GET_REG_OTHERWISE(r, 29, value)
-        GET_REG_OTHERWISE(r, 30, value)
-        GET_REG_OTHERWISE(r, 31, value)
+        registers.read(value, (bit<32>) r);
     }
 
     action set_register(in bit<5> r, in bit<32> value) {
-        // Zero-register must always contain zero
-        SET_REG_PRIMARY(r, 0, 0)
-        SET_REG_OTHERWISE(r, 1, value)
-        SET_REG_OTHERWISE(r, 2, value)
-        SET_REG_OTHERWISE(r, 3, value)
-        SET_REG_OTHERWISE(r, 4, value)
-        SET_REG_OTHERWISE(r, 5, value)
-        SET_REG_OTHERWISE(r, 6, value)
-        SET_REG_OTHERWISE(r, 7, value)
-        SET_REG_OTHERWISE(r, 8, value)
-        SET_REG_OTHERWISE(r, 9, value)
-        SET_REG_OTHERWISE(r, 10, value)
-        SET_REG_OTHERWISE(r, 11, value)
-        SET_REG_OTHERWISE(r, 12, value)
-        SET_REG_OTHERWISE(r, 13, value)
-        SET_REG_OTHERWISE(r, 14, value)
-        SET_REG_OTHERWISE(r, 15, value)
-        SET_REG_OTHERWISE(r, 16, value)
-        SET_REG_OTHERWISE(r, 17, value)
-        SET_REG_OTHERWISE(r, 18, value)
-        SET_REG_OTHERWISE(r, 19, value)
-        SET_REG_OTHERWISE(r, 20, value)
-        SET_REG_OTHERWISE(r, 21, value)
-        SET_REG_OTHERWISE(r, 22, value)
-        SET_REG_OTHERWISE(r, 23, value)
-        SET_REG_OTHERWISE(r, 24, value)
-        SET_REG_OTHERWISE(r, 25, value)
-        SET_REG_OTHERWISE(r, 26, value)
-        SET_REG_OTHERWISE(r, 27, value)
-        SET_REG_OTHERWISE(r, 28, value)
-        SET_REG_OTHERWISE(r, 29, value)
-        SET_REG_OTHERWISE(r, 30, value)
-        SET_REG_OTHERWISE(r, 31, value)
+        registers.write((bit<32>) r, value);
+    }
+
+    /* Read all register values from header into registers primitive. This is
+     * required because we cannot normally access the register header stack with
+     * a non-constant index. The alternative would be to have an action with
+     * many if-else cases, but that would be inlined in every instruction
+     * action, causing the size of the program to expand greatly. */
+    action read_all_registers() {
+        registers.write(0, 0);
+        registers.write(1, hdr.registers[1].value);
+        registers.write(2, hdr.registers[2].value);
+        registers.write(3, hdr.registers[3].value);
+        registers.write(4, hdr.registers[4].value);
+        registers.write(5, hdr.registers[5].value);
+        registers.write(6, hdr.registers[6].value);
+        registers.write(7, hdr.registers[7].value);
+        registers.write(8, hdr.registers[8].value);
+        registers.write(9, hdr.registers[9].value);
+        registers.write(10, hdr.registers[10].value);
+        registers.write(11, hdr.registers[11].value);
+        registers.write(12, hdr.registers[12].value);
+        registers.write(13, hdr.registers[13].value);
+        registers.write(14, hdr.registers[14].value);
+        registers.write(15, hdr.registers[15].value);
+        registers.write(16, hdr.registers[16].value);
+        registers.write(17, hdr.registers[17].value);
+        registers.write(18, hdr.registers[18].value);
+        registers.write(19, hdr.registers[19].value);
+        registers.write(20, hdr.registers[20].value);
+        registers.write(21, hdr.registers[21].value);
+        registers.write(22, hdr.registers[22].value);
+        registers.write(23, hdr.registers[23].value);
+        registers.write(24, hdr.registers[24].value);
+        registers.write(25, hdr.registers[25].value);
+        registers.write(26, hdr.registers[26].value);
+        registers.write(27, hdr.registers[27].value);
+        registers.write(28, hdr.registers[28].value);
+        registers.write(29, hdr.registers[29].value);
+        registers.write(30, hdr.registers[30].value);
+        registers.write(31, hdr.registers[31].value);
+    }
+
+    action write_all_registers() {
+        hdr.registers[0].value = 0;
+        registers.read(hdr.registers[1].value, 1);
+        registers.read(hdr.registers[2].value, 2);
+        registers.read(hdr.registers[3].value, 3);
+        registers.read(hdr.registers[4].value, 4);
+        registers.read(hdr.registers[5].value, 5);
+        registers.read(hdr.registers[6].value, 6);
+        registers.read(hdr.registers[7].value, 7);
+        registers.read(hdr.registers[8].value, 8);
+        registers.read(hdr.registers[9].value, 9);
+        registers.read(hdr.registers[10].value, 10);
+        registers.read(hdr.registers[11].value, 11);
+        registers.read(hdr.registers[12].value, 12);
+        registers.read(hdr.registers[13].value, 13);
+        registers.read(hdr.registers[14].value, 14);
+        registers.read(hdr.registers[15].value, 15);
+        registers.read(hdr.registers[16].value, 16);
+        registers.read(hdr.registers[17].value, 17);
+        registers.read(hdr.registers[18].value, 18);
+        registers.read(hdr.registers[19].value, 19);
+        registers.read(hdr.registers[20].value, 20);
+        registers.read(hdr.registers[21].value, 21);
+        registers.read(hdr.registers[22].value, 22);
+        registers.read(hdr.registers[23].value, 23);
+        registers.read(hdr.registers[24].value, 24);
+        registers.read(hdr.registers[25].value, 25);
+        registers.read(hdr.registers[26].value, 26);
+        registers.read(hdr.registers[27].value, 27);
+        registers.read(hdr.registers[28].value, 28);
+        registers.read(hdr.registers[29].value, 29);
+        registers.read(hdr.registers[30].value, 30);
+        registers.read(hdr.registers[31].value, 31);
     }
 
     action advance_pc() {
@@ -573,6 +586,7 @@ control MyIngress(inout headers hdr,
         }
         else if (switch_role == ROLE_EXECUTION_UNIT) {
             if (meta.current_insn.isValid()) {
+                read_all_registers();
                 // Apply load response if applicable
                 if (hdr.load_response_metadata.isValid()) {
                     set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
@@ -589,6 +603,7 @@ control MyIngress(inout headers hdr,
                 else {
                     standard_metadata.egress_spec = LOAD_BALANCER_PORT;
                 }
+                write_all_registers();
             }
             // Forward back to load balancer if no more instructions to execute
             else {
