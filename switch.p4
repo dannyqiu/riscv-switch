@@ -209,6 +209,8 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
+    /******************** BEGIN: PARSING INSTRUCTION FORMAT ********************/
+
     action bless_rtype(in insn_unknown_t unknown, out insn_rtype_t rtype) {
         rtype.setValid();
         rtype.funct7 = unknown.funct7;
@@ -245,6 +247,10 @@ control MyIngress(inout headers hdr,
         utype.opcode = unknown.opcode;
     }
 
+    /******************** END: PARSING INSTRUCTION FORMAT ********************/
+
+    /******************** BEGIN: PARSING IMMEDIATE FORMAT ********************/
+
     action bless_i_imm(in insn_itype_t itype, out bit<32> imm) {
         imm = 20w0 ++ itype.imm;
         if ((imm & 0x00000800) > 0) {
@@ -276,6 +282,10 @@ control MyIngress(inout headers hdr,
             imm = imm | 0xffe00000;
         }
     }
+
+    /******************** END: PARSING IMMEDIATE FORMAT ********************/
+
+    /******************** BEGIN: CACHING REGISTER HEADER ********************/
 
     action get_register(in bit<5> r, out bit<32> value) {
         registers.read(value, (bit<32>) r);
@@ -359,6 +369,10 @@ control MyIngress(inout headers hdr,
         registers.read(hdr.registers[30].value, 30);
         registers.read(hdr.registers[31].value, 31);
     }
+
+    /******************** END: CACHING REGISTER HEADER ********************/
+
+    /******************** BEGIN: INSTRUCTION HANDLING ********************/
 
     action advance_pc() {
         hdr.program_execution_metadata.pc = hdr.program_execution_metadata.pc + 4;
@@ -455,7 +469,7 @@ control MyIngress(inout headers hdr,
             insn_or;
             insn_sub;
             insn_xor;
-            advance_pc();
+            advance_pc;
         }
         default_action = advance_pc();
         const entries = {
@@ -489,6 +503,10 @@ control MyIngress(inout headers hdr,
         }
     }
 
+    /******************** END: INSTRUCTION HANDLING ********************/
+
+    /******************** BEGIN: SWITCH CONFIGURATION ********************/
+
     action configure_switch(bit<32> id, bit<2> role, bit<32> n_execution_units, bit<32> n_hosts) {
         switch_id = id;
         switch_role = role;
@@ -497,13 +515,11 @@ control MyIngress(inout headers hdr,
     }
 
     table configuration {
-        key = {
-        }
+        key = { }
         actions = {
-            configure_switch();
+            configure_switch;
             drop;
         }
-        size = 1024;
         default_action = drop();
     }
 
@@ -516,10 +532,9 @@ control MyIngress(inout headers hdr,
             target_execution_node_idx: exact;
         }
         actions = {
-            forward_to_execution_node();
+            forward_to_execution_node;
             drop;
         }
-        size = 1024;
         default_action = drop();
     }
 
@@ -528,12 +543,13 @@ control MyIngress(inout headers hdr,
             target_execution_node_id: exact;
         }
         actions = {
-            forward_to_execution_node();
+            forward_to_execution_node;
             drop;
         }
-        size = 1024;
         default_action = drop();
     }
+
+    /******************** END: SWITCH CONFIGURATION ********************/
 
     table debug {
         key = {
@@ -546,7 +562,6 @@ control MyIngress(inout headers hdr,
         actions = {
             NoAction();
         }
-        size = 1024;
         default_action = NoAction();
     }
 
