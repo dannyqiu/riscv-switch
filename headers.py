@@ -148,14 +148,6 @@ def Mul(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000001, part1=target, part2=src, funct3=0b000, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def DivI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b000011, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
-
-
-# def Div(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b100011, dst=dst, src=src, target=target, **kwargs)
-
-
 # def SllI(dst=0, src=0, imm=0, **kwargs):
 #     return Instruction(opcode=0b000100, dst=dst, src=src, target=imm, **kwargs)
 

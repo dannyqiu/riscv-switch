@@ -32,8 +32,6 @@ def main():
         Srl(dst=13, src=3, target=1),    # r13 = 4194303
         Sll(dst=14, src=1, target=1),    # r14 = 43008
         Mul(dst=15, src=1, target=2),    # r15 = 1302
-        # Div(dst=0, src=0, target=0),
-        # DivI(dst=0, src=0, imm=42),
     ])
     hexdump(pkt)
     pkt.show2()
