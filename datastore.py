@@ -24,6 +24,7 @@ def send_reply(pkt):
 
 
 def handle_pkt(pkt):
+    pkt.show2()
     proto = pkt[IP].proto
     if proto == PROTO_STORE_REQUEST:
         # Apply store request

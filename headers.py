@@ -240,8 +240,8 @@ def Sw(dst=0, src=0, imm=0, **kwargs):
     return Instruction(funct7=(imm >> 5), part1=src, part2=dst, funct3=0b010, part3=(((1 << 5) - 1) & imm), opcode=0b0100011, **kwargs)
 
 
-# def Lw(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b110001, dst=dst, src=src, target=target, **kwargs)
+def Lw(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=(((1 << 5) - 1) & imm), part2=src, funct3=0b010, part3=dst, opcode=0b0000011, **kwargs)
 
 
 def Jal(dst=0, imm=0, **kwargs):

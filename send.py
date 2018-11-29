@@ -43,7 +43,8 @@ def main():
         AddI(dst=26, src=25, imm=8),     # r26 = 108 (want to point to pc after Jr)
         Jr(src=26),
         Jalr(dst=27, src=26, imm=4),     # r27 = 112
-        Sw(dst=9, src=15, imm=0),        # mem[8] = 1302
+        Sw(dst=9, src=15, imm=4),        # mem[12] = 1302
+        Lw(dst=28, src=9, imm=4),        # r28 = mem[12] = 1302
     ])
     hexdump(pkt)
     pkt.show2()

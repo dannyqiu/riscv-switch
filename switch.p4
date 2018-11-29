@@ -489,6 +489,22 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_lw() {
+        insn_itype_t lw;
+        bless_itype(meta.current_insn, lw);
+        bit<32> r1;
+        bit<32> imm;
+        get_register(lw.rs1, r1);
+        bless_i_imm(lw, imm);
+        bit<32> target_addr = r1 + imm;
+        hdr.ipv4.protocol = PROTO_LOAD_REQUEST;
+        hdr.load_request_metadata.setValid();
+        hdr.load_request_metadata.address = target_addr;
+        hdr.load_request_metadata.register = lw.rd;
+        hdr.load_request_metadata.execution_node = switch_id;
+        advance_pc();
+    }
+
     action insn_mul() {
         insn_rtype_t mul;
         bless_rtype(meta.current_insn, mul);
@@ -698,6 +714,7 @@ control MyIngress(inout headers hdr,
             insn_jal;
             insn_jalr;
             insn_lui;
+            insn_lw;
             insn_mul;
             insn_or;
             insn_ori;
@@ -744,6 +761,7 @@ control MyIngress(inout headers hdr,
             (_, _, 0b0010111) : insn_auipc();
 
             (_, 0b010, 0b0100011) : insn_sw();
+            (_, 0b010, 0b0000011) : insn_lw();
 
             (_, _, 0b1101111) : insn_jal();
             (_, 0b000, 0b1100111) : insn_jalr();
@@ -850,13 +868,14 @@ control MyIngress(inout headers hdr,
             }
         }
         else if (switch_role == ROLE_EXECUTION_UNIT) {
+            read_all_registers();
+            // Apply load response if applicable
+            if (hdr.load_response_metadata.isValid()) {
+                set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
+                hdr.ipv4.protocol = PROTO_PROGRAM;
+                hdr.load_response_metadata.setInvalid();
+            }
             if (meta.current_insn.isValid()) {
-                read_all_registers();
-                // Apply load response if applicable
-                if (hdr.load_response_metadata.isValid()) {
-                    set_register(hdr.load_response_metadata.register, hdr.load_response_metadata.value);
-                    hdr.load_response_metadata.setInvalid();
-                }
                 insn_opcode.apply();
                 hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
                 // Check if maximum number of execution steps has been reached
@@ -887,12 +906,12 @@ control MyIngress(inout headers hdr,
                 else {
                     standard_metadata.egress_spec = LOAD_BALANCER_PORT;
                 }
-                write_all_registers();
             }
             // Forward back to load balancer if no more instructions to execute
             else {
                 standard_metadata.egress_spec = LOAD_BALANCER_PORT;
             }
+            write_all_registers();
         }
         else if (switch_role == ROLE_DATASTORE) {
             if (standard_metadata.ingress_port == DATASTORE_HOST_PORT) {
@@ -903,10 +922,12 @@ control MyIngress(inout headers hdr,
                 }
                 else if (hdr.load_request_metadata.isValid()) {
                     target_execution_node_id = hdr.load_request_metadata.execution_node;
+                    hdr.ipv4.protocol = PROTO_PROGRAM;
                     hdr.load_request_metadata.setInvalid();
                 }
                 else if (hdr.store_request_metadata.isValid()) {
                     target_execution_node_id = hdr.store_request_metadata.execution_node;
+                    hdr.ipv4.protocol = PROTO_PROGRAM;
                     hdr.store_request_metadata.setInvalid();
                 }
                 else {
