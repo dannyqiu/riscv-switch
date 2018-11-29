@@ -14,8 +14,6 @@ def main():
 
     pkt = Ether(src=get_if_hwaddr(iface), dst=LOAD_BALANCER_MAC)
     pkt = pkt / IP(proto=PROTO_RAW_PROGRAM, dst=LOAD_BALANCER_IP)
-    # Increase default recursion depth so scapy can handle longer programs
-    sys.setrecursionlimit(10000)
     pkt = make_program(pkt, [
         AddI(dst=1, src=0, imm=42),      # r1 = 42
         AddI(dst=2, src=0, imm=31),      # r2 = 31
@@ -41,6 +39,7 @@ def main():
         SllI(dst=22, src=1, imm=5),      # r22 = 1344
         Lui(dst=23, imm=0xabcde),        # r23 = 2882396160
         Auipc(dst=24, imm=0xabcde),      # r23 = 2882396252
+        Sw(dst=9, src=15, imm=0),        # mem[8] = 1302
     ])
     hexdump(pkt)
     pkt.show2()

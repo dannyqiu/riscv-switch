@@ -236,12 +236,8 @@ def Sltu(dst=0, src=0, target=0, **kwargs):
     return Instruction(funct7=0b0000000, part1=target, part2=src, funct3=0b011, part3=dst, opcode=0b0110011, **kwargs)
 
 
-# def SwI(dst=0, src=0, imm=0, **kwargs):
-#     return Instruction(opcode=0b010000, dst=dst, src=src, target=(imm >> 11), imm=(0b11111111111 & imm), **kwargs)
-
-
-# def Sw(dst=0, src=0, target=0, **kwargs):
-#     return Instruction(opcode=0b110000, dst=dst, src=src, target=target, **kwargs)
+def Sw(dst=0, src=0, imm=0, **kwargs):
+    return Instruction(funct7=(imm >> 5), part1=src, part2=dst, funct3=0b010, part3=(((1 << 5) - 1) & imm), opcode=0b0100011, **kwargs)
 
 
 # def Lw(dst=0, src=0, target=0, **kwargs):
@@ -298,3 +294,6 @@ bind_layers(ProgramExecutionMetadata, ProgramMetadata)
 bind_layers(ProgramMetadata, Registers)
 bind_layers(Registers, Instruction)
 bind_layers(Instruction, Instruction)
+
+# Increase default recursion depth so scapy can handle longer programs
+sys.setrecursionlimit(30000)

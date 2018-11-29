@@ -159,6 +159,9 @@ parser MyParser(packet_in packet,
             PROTO_UDP: parse_udp;
             PROTO_RAW_PROGRAM: parse_program;
             PROTO_PROGRAM: parse_program;
+            PROTO_STORE_REQUEST: parse_program;
+            PROTO_LOAD_REQUEST: parse_program;
+            PROTO_LOAD_RESPONSE: parse_program;
             default: accept;
         }
     }
@@ -619,6 +622,24 @@ control MyIngress(inout headers hdr,
         advance_pc();
     }
 
+    action insn_sw() {
+        insn_stype_t sw;
+        bless_stype(meta.current_insn, sw);
+        bit<32> r1;
+        bit<32> r2;
+        bit<32> imm;
+        get_register(sw.rs1, r1);
+        get_register(sw.rs2, r2);
+        bless_s_imm(sw, imm);
+        bit<32> target_addr = r1 + imm;
+        hdr.ipv4.protocol = PROTO_STORE_REQUEST;
+        hdr.store_request_metadata.setValid();
+        hdr.store_request_metadata.address = target_addr;
+        hdr.store_request_metadata.value = r2;
+        hdr.store_request_metadata.execution_node = switch_id;
+        advance_pc();
+    }
+
     action insn_xor() {
         insn_rtype_t xor;
         bless_rtype(meta.current_insn, xor);
@@ -668,6 +689,7 @@ control MyIngress(inout headers hdr,
             insn_srl;
             insn_srli;
             insn_sub;
+            insn_sw;
             insn_xor;
             insn_xori;
             advance_pc;
@@ -700,7 +722,7 @@ control MyIngress(inout headers hdr,
             (_, _, 0b0110111) : insn_lui();
             (_, _, 0b0010111) : insn_auipc();
 
-            // (_, _, 0b0000011) : handle_itype(); // LW
+            (_, 0b010, 0b0100011) : insn_sw();
             // (_, _, 0b1100111) : handle_itype(); // JR / JALR
 
             // (_, _, 0b0100011) : handle_stype(); // SW
@@ -816,10 +838,29 @@ control MyIngress(inout headers hdr,
                 }
                 insn_opcode.apply();
                 hdr.program_execution_metadata.steps = hdr.program_execution_metadata.steps + 1;
-                // Forward to self if execution is not complete
+                // Check if maximum number of execution steps has been reached
                 if (hdr.program_execution_metadata.steps < hdr.program_metadata.max_steps) {
-                    standard_metadata.egress_spec = standard_metadata.ingress_port;
-                    recirculate({meta, standard_metadata});
+                    // Forward to datastore if load/store request needs to be made
+                    if (hdr.store_request_metadata.isValid()) {
+                        if ((hdr.store_request_metadata.address & 0b11) == 0) {
+                            standard_metadata.egress_spec = DATASTORE_PORT;
+                        }
+                        else {
+                            drop();
+                        }
+                    }
+                    else if (hdr.load_request_metadata.isValid()) {
+                        if ((hdr.load_request_metadata.address & 0b11) == 0) {
+                            standard_metadata.egress_spec = DATASTORE_PORT;
+                        }
+                        else {
+                            drop();
+                        }
+                    }
+                    // Forward to self if execution is not complete
+                    else {
+                        recirculate({meta, standard_metadata});
+                    }
                 }
                 // Forward back to load balancer when execution steps are exhausted
                 else {
@@ -898,6 +939,9 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
         packet.emit(hdr.udp);
+        packet.emit(hdr.store_request_metadata);
+        packet.emit(hdr.load_request_metadata);
+        packet.emit(hdr.load_response_metadata);
         packet.emit(hdr.program_execution_metadata);
         packet.emit(hdr.program_metadata);
         packet.emit(hdr.registers);

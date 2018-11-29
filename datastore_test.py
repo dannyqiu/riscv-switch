@@ -37,8 +37,6 @@ def store_request(mem_namespace, address, value, execution_node):
 
 
 def main():
-    # Increase default recursion depth so scapy can handle longer programs
-    sys.setrecursionlimit(10000)
     pkt = store_request(0xdeadbeef, 4, 1337, 0)
     hexdump(pkt)
     pkt.show2()
