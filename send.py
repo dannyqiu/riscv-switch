@@ -9,12 +9,23 @@ from scapy.fields import *
 from headers import *
 
 
-def main():
+def send_program(insns):
+    """
+    Sends a packet containing a Tiny RISC-V program to load balancer for execution
+    :param insns: a list of Tiny RISC-V instructions
+    """
     iface = get_if()
 
     pkt = Ether(src=get_if_hwaddr(iface), dst=LOAD_BALANCER_MAC)
     pkt = pkt / IP(proto=PROTO_RAW_PROGRAM, dst=LOAD_BALANCER_IP)
-    pkt = make_program(pkt, [
+    pkt = make_program(pkt, insns)
+    hexdump(pkt)
+    pkt.show2()
+    sendp(pkt, iface=iface, verbose=False)
+
+
+def main():
+    send_program([
         AddI(dst=1, src=0, imm=42),      # r1 = 42
         AddI(dst=2, src=0, imm=31),      # r2 = 31
         AddI(dst=3, src=0, imm=-1),      # r3 = -1 (4294967295)
@@ -69,9 +80,6 @@ def main():
         AddI(dst=30, src=30, imm=1),
         Sw(dst=1, src=30, imm=2),
     ])
-    hexdump(pkt)
-    pkt.show2()
-    sendp(pkt, iface=iface, verbose=False)
 
 
 if __name__ == '__main__':

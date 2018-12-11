@@ -1,20 +1,10 @@
 #!/usr/bin/env python2
-import sys
-import socket
-
-from scapy.all import sendp, hexdump, get_if_hwaddr
-from scapy.all import Ether, IP
-from scapy.fields import *
-
 from headers import *
+from send import send_program
 
 
 def main():
-    iface = get_if()
-
-    pkt = Ether(src=get_if_hwaddr(iface), dst=LOAD_BALANCER_MAC)
-    pkt = pkt / IP(proto=PROTO_RAW_PROGRAM, dst=LOAD_BALANCER_IP)
-    pkt = make_program(pkt, [
+    send_program([
         AddI(dst=10, src=0, imm=8),    # compute the 8th fibonacci number
 
         AddI(dst=30, src=0, imm=4),
@@ -38,9 +28,6 @@ def main():
 
         AddI(dst=10, src=6, imm=0),
     ])
-    hexdump(pkt)
-    pkt.show2()
-    sendp(pkt, iface=iface, verbose=False)
 
 
 if __name__ == '__main__':
