@@ -21,6 +21,5 @@ To send a test program that executes each of the available Tiny RISC-V assembly 
 
 To send a test program that computes the 8th Fibonacci number: `./fibonacci.py`
 
-Users can write arbitrary Tiny RISC-V assembly programs using the instruction types defined in
-`headers.py` and sending the programs to the load balancer using a script similar to `send.py` or
-`fibonacci.py`.
+Users can execute arbitrary Tiny RISC-V assembly programs by using the instruction types defined in
+`headers.py` and sending the programs to the load balancer using a script similar to `fibonacci.py`.
