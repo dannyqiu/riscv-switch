@@ -2,7 +2,7 @@
 import sys
 import socket
 
-from scapy.all import sendp, hexdump, get_if_hwaddr
+from scapy.all import srp1, hexdump, get_if_hwaddr
 from scapy.all import Ether, IP
 from scapy.fields import *
 
@@ -21,7 +21,8 @@ def send_program(insns):
     pkt = make_program(pkt, insns)
     hexdump(pkt)
     pkt.show2()
-    sendp(pkt, iface=iface, verbose=False)
+    response = srp1(pkt, iface=iface, verbose=False)
+    return response
 
 
 def main():

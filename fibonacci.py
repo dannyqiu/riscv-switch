@@ -1,11 +1,14 @@
 #!/usr/bin/env python2
+import argparse
+import sys
+
 from headers import *
 from send import send_program
 
 
-def main():
-    send_program([
-        AddI(dst=10, src=0, imm=8),    # compute the 8th fibonacci number
+def compute_fibonacci(n):
+    response = send_program([
+        AddI(dst=10, src=0, imm=n),    # compute the nth fibonacci number
 
         AddI(dst=30, src=0, imm=4),
         Mul(dst=31, src=30, target=10),
@@ -29,6 +32,12 @@ def main():
         AddI(dst=10, src=6, imm=0),
     ])
 
+    val = response.sprintf("%Registers.r10%")
+    print("The {} fibonacci number is: {}".format(n, val))
+
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Sample fibonacci program')
+    parser.add_argument('-n', type=int, default=8)
+    args = parser.parse_args()
+    compute_fibonacci(args.n)
